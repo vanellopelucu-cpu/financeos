@@ -1,0 +1,895 @@
+import { motion, type Variants } from 'framer-motion'
+import { useState } from 'react'
+import {
+  Bell,
+  CalendarDays,
+  CheckCircle,
+  Database,
+  Download,
+  Globe,
+  Key,
+  Lock,
+  LogOut,
+  Moon,
+  Save,
+  Settings as SettingsIcon,
+  Shield,
+  Smartphone,
+  Sun,
+  Trash2,
+  User,
+} from 'lucide-react'
+import { useTheme } from '../app/providers/ThemeContext'
+import { useWorkspace } from '../app/providers/WorkspaceContext'
+import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/Card'
+import { Badge } from '../components/ui/Badge'
+import { cn } from '../lib/utils'
+
+const containerVariants: Variants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: { staggerChildren: 0.15, delayChildren: 0.1 },
+  },
+}
+
+const rowVariants: Variants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: 'easeOut' } },
+}
+
+const cardVariants: Variants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: 'easeOut' } },
+}
+
+function Profile() {
+  const { currentWorkspace } = useWorkspace()
+
+  return (
+    <motion.div variants={rowVariants}>
+      <Card glass elevated className="border-0 p-0 shadow-xl">
+        <CardHeader className="border-b border-border/50 pb-4">
+          <CardTitle className="text-sm font-medium uppercase tracking-wider text-text-secondary">
+            Profile
+          </CardTitle>
+        </CardHeader>
+
+        <CardContent className="p-6">
+          <motion.div
+            className="flex flex-col items-center gap-6 sm:flex-row sm:items-start sm:gap-8"
+            initial="hidden"
+            animate="visible"
+            variants={{
+              visible: { transition: { staggerChildren: 0.1, delayChildren: 0.1 } },
+            }}
+          >
+            <motion.div
+              variants={cardVariants}
+              className="flex flex-shrink-0 flex-col items-center gap-3"
+            >
+              <div className="flex h-24 w-24 items-center justify-center rounded-full bg-gradient-to-br from-workspace to-workspace-hover text-4xl text-white shadow-xl">
+                👤
+              </div>
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.98 }}
+                className={cn(
+                  'rounded-lg border border-border bg-secondary px-4 py-2 text-sm font-medium text-text-secondary transition-all hover:bg-border'
+                )}
+              >
+                Change Photo
+              </motion.button>
+            </motion.div>
+
+            <div className="flex-1 space-y-4">
+              <motion.div variants={cardVariants}>
+                <p className="text-xs font-medium uppercase tracking-wider text-text-tertiary">
+                  Full Name
+                </p>
+                <p className="mt-1 text-xl font-semibold text-text">
+                  Alex Johnson
+                </p>
+              </motion.div>
+
+              <motion.div variants={cardVariants}>
+                <p className="text-xs font-medium uppercase tracking-wider text-text-tertiary">
+                  Email
+                </p>
+                <p className="mt-1 text-xl font-semibold text-text">
+                  alex.johnson@example.com
+                </p>
+              </motion.div>
+
+              <motion.div variants={cardVariants}>
+                <p className="text-xs font-medium uppercase tracking-wider text-text-tertiary">
+                  Workspace
+                </p>
+                <p className="mt-1 text-xl font-semibold text-text">
+                  {currentWorkspace.name} • {currentWorkspace.currency.symbol}
+                </p>
+              </motion.div>
+
+              <motion.div variants={cardVariants}>
+                <p className="text-xs font-medium uppercase tracking-wider text-text-tertiary">
+                  Member Since
+                </p>
+                <p className="mt-1 text-xl font-semibold text-text">
+                  January 15, 2024
+                </p>
+              </motion.div>
+            </div>
+
+            <motion.div
+              variants={cardVariants}
+              className="flex flex-shrink-0 flex-col gap-3"
+            >
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                className={cn(
+                  'flex items-center justify-center gap-2 rounded-xl border border-border bg-secondary px-4 py-2.5 text-sm font-medium text-text transition-all hover:bg-border'
+                )}
+              >
+                <User size={16} />
+                Edit Profile
+              </motion.button>
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                className={cn(
+                  'flex items-center justify-center gap-2 rounded-xl border border-border bg-secondary px-4 py-2.5 text-sm font-medium text-text transition-all hover:bg-border'
+                )}
+              >
+                <Key size={16} />
+                Change Password
+              </motion.button>
+            </motion.div>
+          </motion.div>
+        </CardContent>
+      </Card>
+    </motion.div>
+  )
+}
+
+function Appearance() {
+  const { theme, setTheme } = useTheme()
+
+  const themes = [
+    { id: 'light', name: 'Light Mode', icon: Sun },
+    { id: 'dark', name: 'Dark Mode', icon: Moon },
+    { id: 'system', name: 'System Mode', icon: Globe },
+  ]
+
+  return (
+    <motion.div variants={rowVariants}>
+      <Card glass elevated className="border-0 p-0 shadow-xl">
+        <CardHeader className="border-b border-border/50 pb-4">
+          <div className="flex items-center gap-3">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-workspace/10 text-workspace">
+              <Sun size={16} />
+            </div>
+            <CardTitle className="text-sm font-medium uppercase tracking-wider text-text-secondary">
+              Appearance
+            </CardTitle>
+          </div>
+        </CardHeader>
+
+        <CardContent className="p-6">
+          <motion.div
+            className="space-y-3"
+            initial="hidden"
+            animate="visible"
+            variants={{
+              visible: { transition: { staggerChildren: 0.1, delayChildren: 0.1 } },
+            }}
+          >
+            {themes.map((t) => {
+              const Icon = t.icon
+              const isSelected = theme === t.id
+              return (
+                <motion.div
+                  key={t.id}
+                  variants={cardVariants}
+                  whileHover={{ x: 4 }}
+                  onClick={() => setTheme(t.id as 'light' | 'dark')}
+                  className={cn(
+                    'flex cursor-pointer items-center gap-4 rounded-xl border p-4 transition-all',
+                    isSelected
+                      ? 'border-workspace bg-workspace/5'
+                      : 'border-border/50 bg-secondary/50 hover:border-workspace/30'
+                  )}
+                >
+                  <div
+                    className={cn(
+                      'flex h-10 w-10 items-center justify-center rounded-lg',
+                      isSelected
+                        ? 'bg-workspace text-white'
+                        : 'bg-secondary text-text-tertiary'
+                    )}
+                  >
+                    <Icon size={20} />
+                  </div>
+                  <div className="flex-1">
+                    <p className="font-medium text-text">{t.name}</p>
+                    <p className="text-sm text-text-secondary">
+                      {t.id === 'light'
+                        ? 'Clean white interface with subtle shadows'
+                        : t.id === 'dark'
+                          ? 'Premium dark interface with glass cards'
+                          : 'Follows your system preference'}
+                    </p>
+                  </div>
+                  {isSelected && (
+                    <motion.div
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+                      className="flex h-6 w-6 items-center justify-center rounded-full bg-workspace text-white"
+                    >
+                      <CheckCircle size={14} />
+                    </motion.div>
+                  )}
+                </motion.div>
+              )
+            })}
+          </motion.div>
+        </CardContent>
+      </Card>
+    </motion.div>
+  )
+}
+
+function WorkspaceSelector() {
+  const { currentWorkspace, workspaces, setWorkspace } = useWorkspace()
+
+  return (
+    <motion.div variants={rowVariants}>
+      <Card glass elevated className="border-0 p-0 shadow-xl">
+        <CardHeader className="border-b border-border/50 pb-4">
+          <div className="flex items-center gap-3">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-workspace/10 text-workspace">
+              <Globe size={16} />
+            </div>
+            <CardTitle className="text-sm font-medium uppercase tracking-wider text-text-secondary">
+              Workspace
+            </CardTitle>
+          </div>
+        </CardHeader>
+
+        <CardContent className="p-6">
+          <motion.div
+            className="space-y-3"
+            initial="hidden"
+            animate="visible"
+            variants={{
+              visible: { transition: { staggerChildren: 0.1, delayChildren: 0.1 } },
+            }}
+          >
+            {workspaces.map((ws) => {
+              const isSelected = currentWorkspace.id === ws.id
+              const flag = ws.id === 'srilanka' ? '🇱🇰' : '🇮🇩'
+              return (
+                <motion.div
+                  key={ws.id}
+                  variants={cardVariants}
+                  whileHover={{ x: 4 }}
+                  onClick={() => setWorkspace(ws.id)}
+                  className={cn(
+                    'flex cursor-pointer items-center gap-4 rounded-xl border p-4 transition-all',
+                    isSelected
+                      ? 'border-workspace bg-workspace/5'
+                      : 'border-border/50 bg-secondary/50 hover:border-workspace/30'
+                  )}
+                >
+                  <div className="text-2xl">{flag}</div>
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2">
+                      <p className="font-medium text-text">{ws.name}</p>
+                      <Badge
+                        variant={
+                          ws.theme === 'green' ? 'success' : 'secondary'
+                        }
+                        size="sm"
+                      >
+                        {ws.theme === 'green' ? 'Green' : 'Blue'}
+                      </Badge>
+                    </div>
+                    <p className="text-sm text-text-secondary">
+                      {ws.currency.name} ({ws.currency.symbol})
+                    </p>
+                  </div>
+                  {isSelected && (
+                    <motion.div
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+                      className="flex h-6 w-6 items-center justify-center rounded-full bg-workspace text-white"
+                    >
+                      <CheckCircle size={14} />
+                    </motion.div>
+                  )}
+                </motion.div>
+              )
+            })}
+          </motion.div>
+        </CardContent>
+      </Card>
+    </motion.div>
+  )
+}
+
+function CurrencyRegion() {
+  const { currentWorkspace } = useWorkspace()
+  const { currency } = currentWorkspace
+
+  const locale = currency.code === 'LKR' ? 'en-LK' : 'id-ID'
+  const dateFormats = {
+    LKR: 'DD / MM / YYYY',
+    IDR: 'DD / MM / YYYY',
+  }
+  const numberFormats = {
+    LKR: '1,000,000.00',
+    IDR: '1.000.000,00',
+  }
+
+  return (
+    <motion.div variants={rowVariants}>
+      <Card glass elevated className="border-0 p-0 shadow-xl">
+        <CardHeader className="border-b border-border/50 pb-4">
+          <div className="flex items-center gap-3">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-workspace/10 text-workspace">
+              <Globe size={16} />
+            </div>
+            <CardTitle className="text-sm font-medium uppercase tracking-wider text-text-secondary">
+              Currency & Region
+            </CardTitle>
+          </div>
+        </CardHeader>
+
+        <CardContent className="p-6">
+          <motion.div
+            className="grid grid-cols-1 gap-4 sm:grid-cols-2"
+            initial="hidden"
+            animate="visible"
+            variants={{
+              visible: { transition: { staggerChildren: 0.1, delayChildren: 0.1 } },
+            }}
+          >
+            <motion.div variants={cardVariants}>
+              <p className="text-xs font-medium uppercase tracking-wider text-text-tertiary">
+                Current Currency
+              </p>
+              <p className="mt-1 text-xl font-semibold text-text">
+                {currency.symbol} ({currency.code})
+              </p>
+            </motion.div>
+
+            <motion.div variants={cardVariants}>
+              <p className="text-xs font-medium uppercase tracking-wider text-text-tertiary">
+                Locale
+              </p>
+              <p className="mt-1 text-xl font-semibold text-text">
+                {currency.name} ({locale})
+              </p>
+            </motion.div>
+
+            <motion.div variants={cardVariants}>
+              <p className="text-xs font-medium uppercase tracking-wider text-text-tertiary">
+                Date Format
+              </p>
+              <p className="mt-1 text-xl font-semibold text-text">
+                {dateFormats[currency.code as keyof typeof dateFormats]}
+              </p>
+            </motion.div>
+
+            <motion.div variants={cardVariants}>
+              <p className="text-xs font-medium uppercase tracking-wider text-text-tertiary">
+                Number Format
+              </p>
+              <p className="mt-1 text-xl font-semibold text-text">
+                {numberFormats[currency.code as keyof typeof numberFormats]}
+              </p>
+            </motion.div>
+          </motion.div>
+        </CardContent>
+      </Card>
+    </motion.div>
+  )
+}
+
+function Notifications() {
+  const [notifications, setNotifications] = useState({
+    billReminders: true,
+    lowBalanceAlerts: true,
+    weeklySummary: true,
+    monthlyReport: true,
+    aiTips: true,
+  })
+
+  const toggleNotification = (key: keyof typeof notifications) => {
+    setNotifications((prev) => ({ ...prev, [key]: !prev[key] }))
+  }
+
+  const notificationItems = [
+    { key: 'billReminders', name: 'Bill Reminders', desc: 'Notify before bills are due' },
+    { key: 'lowBalanceAlerts', name: 'Low Balance Alerts', desc: 'Alert when balance is low' },
+    { key: 'weeklySummary', name: 'Weekly Financial Summary', desc: 'Weekly spending overview' },
+    { key: 'monthlyReport', name: 'Monthly Report', desc: 'Detailed monthly analytics' },
+    { key: 'aiTips', name: 'AI Finance Buddy Tips', desc: 'Personalized financial advice' },
+  ]
+
+  return (
+    <motion.div variants={rowVariants}>
+      <Card glass elevated className="border-0 p-0 shadow-xl">
+        <CardHeader className="border-b border-border/50 pb-4">
+          <div className="flex items-center gap-3">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-workspace/10 text-workspace">
+              <Bell size={16} />
+            </div>
+            <CardTitle className="text-sm font-medium uppercase tracking-wider text-text-secondary">
+              Notifications
+            </CardTitle>
+          </div>
+        </CardHeader>
+
+        <CardContent className="p-0">
+          <motion.div
+            className="divide-y divide-border/50"
+            initial="hidden"
+            animate="visible"
+            variants={{
+              visible: { transition: { staggerChildren: 0.1, delayChildren: 0.1 } },
+            }}
+          >
+            {notificationItems.map((item) => {
+              const isEnabled =
+                notifications[item.key as keyof typeof notifications]
+              return (
+                <motion.div
+                  key={item.key}
+                  variants={cardVariants}
+                  className="flex items-center justify-between p-4 transition-all hover:bg-secondary/50"
+                >
+                  <div className="flex items-start gap-4">
+                    <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-secondary">
+                      <Bell size={20} className="text-text-tertiary" />
+                    </div>
+                    <div>
+                      <p className="font-medium text-text">{item.name}</p>
+                      <p className="text-sm text-text-secondary">
+                        {item.desc}
+                      </p>
+                    </div>
+                  </div>
+                  <motion.button
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => toggleNotification(item.key as keyof typeof notifications)}
+                    className={cn(
+                      'relative h-6 w-12 rounded-full transition-colors',
+                      isEnabled ? 'bg-workspace' : 'bg-border'
+                    )}
+                  >
+                    <motion.div
+                      className={cn(
+                        'absolute top-0.5 h-5 w-5 rounded-full bg-white shadow-md transition-transform'
+                      )}
+                      animate={{
+                        x: isEnabled ? 26 : 2,
+                      }}
+                      transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+                    />
+                  </motion.button>
+                </motion.div>
+              )
+            })}
+          </motion.div>
+        </CardContent>
+      </Card>
+    </motion.div>
+  )
+}
+
+function Security() {
+  const securityItems = [
+    {
+      id: 'password',
+      icon: <Lock size={20} />,
+      title: 'Change Password',
+      desc: 'Update your account password',
+      status: 'Configured',
+      statusType: 'success' as const,
+      action: 'Update',
+    },
+    {
+      id: '2fa',
+      icon: <Shield size={20} />,
+      title: 'Two-Factor Authentication',
+      desc: 'Add extra security to your account',
+      status: 'Not Enabled',
+      statusType: 'warning' as const,
+      action: 'Enable',
+    },
+    {
+      id: 'sessions',
+      icon: <LogOut size={20} />,
+      title: 'Active Sessions',
+      desc: 'Manage your logged-in devices',
+      status: '3 Active',
+      statusType: 'default' as const,
+      action: 'View',
+    },
+    {
+      id: 'devices',
+      icon: <Smartphone size={20} />,
+      title: 'Connected Devices',
+      desc: 'Devices linked to your account',
+      status: '2 Devices',
+      statusType: 'default' as const,
+      action: 'Manage',
+    },
+  ]
+
+  return (
+    <motion.div variants={rowVariants}>
+      <Card glass elevated className="border-0 p-0 shadow-xl">
+        <CardHeader className="border-b border-border/50 pb-4">
+          <div className="flex items-center gap-3">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-workspace/10 text-workspace">
+              <Shield size={16} />
+            </div>
+            <CardTitle className="text-sm font-medium uppercase tracking-wider text-text-secondary">
+              Security
+            </CardTitle>
+          </div>
+        </CardHeader>
+
+        <CardContent className="p-6">
+          <motion.div
+            className="space-y-4"
+            initial="hidden"
+            animate="visible"
+            variants={{
+              visible: { transition: { staggerChildren: 0.1, delayChildren: 0.1 } },
+            }}
+          >
+            {securityItems.map((item) => (
+              <motion.div
+                key={item.id}
+                variants={cardVariants}
+                whileHover={{ x: 4 }}
+                className="flex items-center justify-between rounded-xl border border-border/50 bg-secondary/30 p-4 transition-all"
+              >
+                <div className="flex items-center gap-4">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-secondary">
+                    {item.icon}
+                  </div>
+                  <div>
+                    <p className="font-medium text-text">{item.title}</p>
+                    <p className="text-sm text-text-secondary">{item.desc}</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <Badge
+                    variant={
+                      item.statusType === 'success'
+                        ? 'success'
+                        : item.statusType === 'warning'
+                          ? 'warning'
+                          : 'secondary'
+                    }
+                    size="sm"
+                  >
+                    {item.status}
+                  </Badge>
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.98 }}
+                    className={cn(
+                      'rounded-lg border border-border bg-secondary px-3 py-1.5 text-sm font-medium text-text-secondary transition-all hover:bg-border'
+                    )}
+                  >
+                    {item.action}
+                  </motion.button>
+                </div>
+              </motion.div>
+            ))}
+          </motion.div>
+        </CardContent>
+      </Card>
+    </motion.div>
+  )
+}
+
+function DataPrivacy() {
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+
+  const dataItems = [
+    {
+      id: 'export',
+      icon: <Download size={20} />,
+      title: 'Export Data',
+      desc: 'Download a copy of your data',
+      action: 'Export',
+      variant: 'default' as const,
+    },
+    {
+      id: 'backup',
+      icon: <Save size={20} />,
+      title: 'Backup',
+      desc: 'Schedule automatic backups',
+      action: 'Configure',
+      variant: 'default' as const,
+    },
+    {
+      id: 'privacy',
+      icon: <Shield size={20} />,
+      title: 'Privacy Settings',
+      desc: 'Control your privacy preferences',
+      action: 'Settings',
+      variant: 'default' as const,
+    },
+    {
+      id: 'delete',
+      icon: <Trash2 size={20} />,
+      title: 'Delete Account',
+      desc: 'Permanently delete your account',
+      action: 'Delete',
+      variant: 'destructive' as const,
+    },
+  ]
+
+  return (
+    <motion.div variants={rowVariants}>
+      <Card glass elevated className="border-0 p-0 shadow-xl">
+        <CardHeader className="border-b border-border/50 pb-4">
+          <div className="flex items-center gap-3">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-workspace/10 text-workspace">
+              <Database size={16} />
+            </div>
+            <CardTitle className="text-sm font-medium uppercase tracking-wider text-text-secondary">
+              Data & Privacy
+            </CardTitle>
+          </div>
+        </CardHeader>
+
+        <CardContent className="p-6">
+          <motion.div
+            className="space-y-4"
+            initial="hidden"
+            animate="visible"
+            variants={{
+              visible: { transition: { staggerChildren: 0.1, delayChildren: 0.1 } },
+            }}
+          >
+            {dataItems.map((item) => (
+              <motion.div
+                key={item.id}
+                variants={cardVariants}
+                whileHover={{ x: 4 }}
+                className="flex items-center justify-between rounded-xl border border-border/50 bg-secondary/30 p-4 transition-all"
+              >
+                <div className="flex items-center gap-4">
+                  <div
+                    className={cn(
+                      'flex h-10 w-10 items-center justify-center rounded-lg',
+                      item.variant === 'destructive'
+                        ? 'bg-red-500/10 text-red-500'
+                        : 'bg-secondary text-text-tertiary'
+                    )}
+                  >
+                    {item.icon}
+                  </div>
+                  <div>
+                    <p className="font-medium text-text">{item.title}</p>
+                    <p className="text-sm text-text-secondary">{item.desc}</p>
+                  </div>
+                </div>
+                {item.id === 'delete' ? (
+                  showDeleteConfirm ? (
+                    <motion.div
+                      initial={{ opacity: 0, scale: 0.9 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      className="flex items-center gap-2"
+                    >
+                      <p className="text-sm font-medium text-red-500">
+                        Are you sure?
+                      </p>
+                      <motion.button
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.98 }}
+                        onClick={() => setShowDeleteConfirm(false)}
+                        className={cn(
+                          'rounded-lg border border-border bg-secondary px-3 py-1.5 text-sm font-medium text-text-secondary transition-all hover:bg-border'
+                        )}
+                      >
+                        Cancel
+                      </motion.button>
+                      <motion.button
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.98 }}
+                        className={cn(
+                          'rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-1.5 text-sm font-medium text-red-500 transition-all hover:bg-red-500/20'
+                        )}
+                      >
+                        Confirm Delete
+                      </motion.button>
+                    </motion.div>
+                  ) : (
+                    <motion.button
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.98 }}
+                      onClick={() => setShowDeleteConfirm(true)}
+                      className={cn(
+                        'rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-1.5 text-sm font-medium text-red-500 transition-all hover:bg-red-500/20'
+                      )}
+                    >
+                      {item.action}
+                    </motion.button>
+                  )
+                ) : (
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.98 }}
+                    className={cn(
+                      'rounded-lg border border-border bg-secondary px-3 py-1.5 text-sm font-medium text-text-secondary transition-all hover:bg-border'
+                    )}
+                  >
+                    {item.action}
+                  </motion.button>
+                )}
+              </motion.div>
+            ))}
+          </motion.div>
+        </CardContent>
+      </Card>
+    </motion.div>
+  )
+}
+
+function AboutFinanceOS() {
+  const appVersion = 'v2.5.0'
+  const buildVersion = 'build-2026-07-31'
+  const lastUpdated = 'July 31, 2026'
+  const environment = 'Production'
+
+  return (
+    <motion.div variants={rowVariants}>
+      <Card glass elevated className="border-0 p-0 shadow-xl">
+        <CardHeader className="border-b border-border/50 pb-4">
+          <div className="flex items-center gap-3">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-workspace/10 text-workspace">
+              <SettingsIcon size={16} />
+            </div>
+            <CardTitle className="text-sm font-medium uppercase tracking-wider text-text-secondary">
+              About FinanceOS
+            </CardTitle>
+          </div>
+        </CardHeader>
+
+        <CardContent className="p-6">
+          <motion.div
+            className="space-y-4"
+            initial="hidden"
+            animate="visible"
+            variants={{
+              visible: { transition: { staggerChildren: 0.1, delayChildren: 0.1 } },
+            }}
+          >
+            <motion.div variants={cardVariants}>
+              <p className="text-xs font-medium uppercase tracking-wider text-text-tertiary">
+                App Version
+              </p>
+              <p className="mt-1 text-xl font-semibold text-text">
+                {appVersion}
+              </p>
+            </motion.div>
+
+            <motion.div variants={cardVariants}>
+              <p className="text-xs font-medium uppercase tracking-wider text-text-tertiary">
+                Build Version
+              </p>
+              <p className="mt-1 text-xl font-semibold text-text">
+                {buildVersion}
+              </p>
+            </motion.div>
+
+            <motion.div variants={cardVariants}>
+              <p className="text-xs font-medium uppercase tracking-wider text-text-tertiary">
+                Last Updated
+              </p>
+              <p className="mt-1 text-xl font-semibold text-text">
+                {lastUpdated}
+              </p>
+            </motion.div>
+
+            <motion.div variants={cardVariants}>
+              <p className="text-xs font-medium uppercase tracking-wider text-text-tertiary">
+                Environment
+              </p>
+              <div className="mt-1 flex items-center gap-2">
+                <span
+                  className={cn(
+                    'inline-flex h-2 w-2 rounded-full',
+                    environment === 'Production'
+                      ? 'bg-sri-500'
+                      : 'bg-amber-500'
+                  )}
+                />
+                <p className="text-xl font-semibold text-text">
+                  {environment}
+                </p>
+              </div>
+            </motion.div>
+          </motion.div>
+        </CardContent>
+      </Card>
+    </motion.div>
+  )
+}
+
+export function Settings() {
+  const { currentWorkspace } = useWorkspace()
+
+  const today = new Date()
+  const dateLabel = today.toLocaleDateString('en-US', {
+    weekday: 'long',
+    month: 'long',
+    day: 'numeric',
+    year: 'numeric',
+  })
+
+  return (
+    <motion.div
+      variants={containerVariants}
+      initial="hidden"
+      animate="visible"
+      className="flex flex-col gap-8"
+    >
+      <motion.div
+        variants={rowVariants}
+        className="flex flex-col gap-2"
+      >
+        <div className="flex items-center gap-3">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-workspace/10 text-workspace">
+            <SettingsIcon size={16} />
+          </div>
+          <h1 className="text-3xl font-bold tracking-tight text-text">
+            Settings
+          </h1>
+        </div>
+        <div className="flex items-center gap-2 text-sm text-text-secondary">
+          <CalendarDays size={14} className="text-text-tertiary" />
+          <span>{dateLabel}</span>
+          <span className="mx-2 text-text-tertiary">·</span>
+          <span className="font-medium text-text">
+            {currentWorkspace.name} • {currentWorkspace.currency.symbol}
+          </span>
+        </div>
+      </motion.div>
+
+      <Profile />
+
+      <Appearance />
+
+      <WorkspaceSelector />
+
+      <CurrencyRegion />
+
+      <Notifications />
+
+      <Security />
+
+      <DataPrivacy />
+
+      <AboutFinanceOS />
+
+      <motion.div
+        variants={rowVariants}
+        className="text-center text-sm text-text-tertiary"
+      >
+        © FinanceOS — Premium Financial Dashboard
+      </motion.div>
+    </motion.div>
+  )
+}
