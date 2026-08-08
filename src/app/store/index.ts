@@ -39,12 +39,16 @@ export interface DashboardState {
   fetchAccounts: () => Promise<void>
   fetchAnalytics: () => Promise<void>
   fetchBudgets: () => Promise<void>
+  addPocket: (pocket: Omit<MoneyPocket, 'id'>) => Promise<{ success: boolean; error?: string }>
+  editPocket: (id: string, pocket: Partial<Omit<MoneyPocket, 'id'>>) => Promise<{ success: boolean; error?: string }>
+  deletePocket: (id: string) => Promise<{ success: boolean; error?: string }>
 }
 
 export const useDashboardStore = create<DashboardState>()(
   devtools(
     persist(
-      (set, get) => ({
+      (set, get) => {
+        return {
         currentWorkspace: 'indonesia',
         balance: DASHBOARD_DATA.balance['indonesia'],
         analytics: DASHBOARD_DATA.analytics['indonesia'],
@@ -67,8 +71,8 @@ export const useDashboardStore = create<DashboardState>()(
             moneyPockets: data.moneyPockets[workspace],
              accounts: data.accounts[workspace],
              budgets: data.budgets[workspace],
-             searchQuery: '',
-           })
+            searchQuery: '',
+          })
         },
 
         setSearchQuery: (query) => set({ searchQuery: query }),
@@ -101,9 +105,11 @@ export const useDashboardStore = create<DashboardState>()(
           try {
             const { data, error } = await supabase
               .from('transactions')
-              .select('id, description, category, date, amount, icon')
+              .select('id, description, category, date, amount, icon, created_at')
               .eq('workspace', workspace)
+              .order('created_at', { ascending: false })
               .order('date', { ascending: false })
+              .order('id', { ascending: false })
 
             if (error) {
               console.error('Failed to fetch transactions:', error)
@@ -121,6 +127,7 @@ export const useDashboardStore = create<DashboardState>()(
                 date: row.date,
                 amount: Number(row.amount),
                 icon: row.icon,
+                createdAt: row.created_at,
               }))
               set({ transactions: mapped })
             }
@@ -220,7 +227,112 @@ export const useDashboardStore = create<DashboardState>()(
           }
         },
 
-         fetchAccounts: async () => {
+        addPocket: async (pocket) => {
+          const workspace = get().currentWorkspace
+          const normalizedName = pocket.name.trim()
+
+          const existing = get().moneyPockets.find((p) => p.name.toLowerCase() === normalizedName.toLowerCase())
+          if (existing) {
+            return { success: false, error: 'This pocket already exists.' }
+          }
+
+          if (!isSupabaseConfigured) {
+            const { moneyPockets } = get()
+            const newPocket: MoneyPocket = {
+              id: `temp-${Date.now()}`,
+              ...pocket,
+            }
+            set({ moneyPockets: [...moneyPockets, newPocket] })
+            return { success: true }
+          }
+
+          try {
+            const { error } = await supabase
+              .from('money_pockets')
+              .insert({
+                workspace,
+                name: normalizedName,
+                icon: pocket.icon || '💰',
+                current_amount: pocket.currentAmount,
+                target_amount: pocket.targetAmount,
+                status: pocket.status,
+              })
+
+            if (error) {
+              console.error('Failed to add pocket:', error)
+              return { success: false, error: 'Failed to add pocket.' }
+            }
+
+            await get().fetchMoneyPockets()
+            return { success: true }
+          } catch (err) {
+            console.error('Error adding pocket:', err)
+            return { success: false, error: 'Failed to add pocket.' }
+          }
+        },
+
+        editPocket: async (id, pocket) => {
+          if (!isSupabaseConfigured) {
+            const { moneyPockets } = get()
+            const updated = moneyPockets.map((p) =>
+              p.id === id ? { ...p, ...pocket } : p
+            )
+            set({ moneyPockets: updated })
+            return { success: true }
+          }
+
+          try {
+            const { error } = await supabase
+              .from('money_pockets')
+              .update({
+                name: pocket.name,
+                icon: pocket.icon,
+                current_amount: pocket.currentAmount,
+                target_amount: pocket.targetAmount,
+                status: pocket.status,
+              })
+              .eq('id', id)
+
+            if (error) {
+              console.error('Failed to edit pocket:', error)
+              return { success: false, error: 'Failed to edit pocket.' }
+            }
+
+            await get().fetchMoneyPockets()
+            return { success: true }
+          } catch (err) {
+            console.error('Error editing pocket:', err)
+            return { success: false, error: 'Failed to edit pocket.' }
+          }
+        },
+
+        deletePocket: async (id) => {
+          if (!isSupabaseConfigured) {
+            const { moneyPockets } = get()
+            set({ moneyPockets: moneyPockets.filter((p) => p.id !== id) })
+            return { success: true }
+          }
+
+          try {
+            const { error } = await supabase
+              .from('money_pockets')
+              .delete()
+              .eq('id', id)
+
+            if (error) {
+              console.error('Failed to delete pocket:', error)
+              return { success: false, error: 'Failed to delete pocket.' }
+            }
+
+            await get().fetchMoneyPockets()
+            return { success: true }
+          } catch (err) {
+            console.error('Error deleting pocket:', err)
+            return { success: false, error: 'Failed to delete pocket.' }
+          }
+        },
+
+        fetchAccounts: async () => {
           const workspace = get().currentWorkspace
 
           if (!isSupabaseConfigured) {
@@ -438,7 +550,7 @@ export const useDashboardStore = create<DashboardState>()(
             })
           }
         },
-      }),
+      }},
       { name: 'finance-os-storage' }
     )
   )

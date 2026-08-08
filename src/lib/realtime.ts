@@ -28,6 +28,7 @@ interface TableSubscription {
 }
 
 const TABLES: TableSubscription[] = [
+  { name: 'profiles', filterColumn: 'workspace' },
   { name: 'transactions', filterColumn: 'workspace' },
   { name: 'bills', filterColumn: 'workspace' },
   { name: 'money_pockets', filterColumn: 'workspace' },

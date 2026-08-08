@@ -1,42 +1,124 @@
 import { motion } from 'framer-motion'
-import { Target } from 'lucide-react'
+import { Pencil, Plus, Trash2, Wallet } from 'lucide-react'
+import { useState } from 'react'
 import { useWorkspace } from '../../../app/providers/WorkspaceContext'
 import { useDashboardStore } from '../../../app/store'
 import { Card, CardContent, CardHeader, CardTitle } from '../../../components/ui/Card'
 import { cn, formatCurrencyFull } from '../../../lib/utils'
+import type { MoneyPocket } from '../../../lib/types'
+import { AddPocketModal } from './AddPocketModal'
+import { EditPocketModal } from './EditPocketModal'
+import { DeleteConfirmation } from './DeleteConfirmation'
 
 const cardVariants = {
   hidden: { opacity: 0, y: 20 },
   visible: { opacity: 1, y: 0 },
 }
 
-const statusColors = {
-  'on-track': {
-    bg: 'bg-workspace/10',
-    text: 'text-workspace',
-    label: 'On Track',
-  },
-  behind: {
-    bg: 'bg-amber-500/10',
-    text: 'text-amber-500',
-    label: 'Behind',
-  },
-  completed: {
-    bg: 'bg-indigo-500/10',
-    text: 'text-indigo-500',
-    label: 'Completed',
-  },
-  'just-started': {
-    bg: 'bg-slate-400/10',
-    text: 'text-slate-500',
-    label: 'Just Started',
-  },
-}
+const DEFAULT_POCKETS = [
+  { id: 'pocket-pendidikan', name: 'Pendidikan', icon: '🎓' },
+  { id: 'pocket-dana-darurat', name: 'Dana Darurat', icon: '🚨' },
+  { id: 'pocket-liburan', name: 'Liburan', icon: '🏖️' },
+  { id: 'pocket-tabungan-rumah', name: 'Tabungan Rumah', icon: '🏠' },
+]
 
 export function MoneyPockets() {
   const { currentWorkspace } = useWorkspace()
-  const { currency } = currentWorkspace
-  const { moneyPockets } = useDashboardStore()
+  const { currency, theme } = currentWorkspace
+  const { moneyPockets = [], addPocket, editPocket, deletePocket, fetchMoneyPockets } =
+    useDashboardStore()
+
+  const [showAddModal, setShowAddModal] = useState(false)
+  const [showEditModal, setShowEditModal] = useState(false)
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const [editingPocket, setEditingPocket] = useState<MoneyPocket | null>(null)
+  const [deletingPocket, setDeletingPocket] = useState<MoneyPocket | null>(null)
+
+  const pocketMap = new Map((moneyPockets || []).map((p) => [p.name, p]))
+  const pockets = DEFAULT_POCKETS.map((dp) => {
+    const existing = pocketMap.get(dp.name)
+    return {
+      id: existing?.id || dp.id,
+      name: dp.name,
+      icon: existing?.icon || dp.icon,
+      currentAmount: existing ? existing.currentAmount : 0,
+      targetAmount: existing ? existing.targetAmount : 0,
+      status: existing ? existing.status : 'just-started',
+    }
+  })
+
+  const handleAddSave = async (pocket: {
+    name: string
+    icon: string
+    currentAmount: number
+    targetAmount: number
+  }) => {
+    const progress = pocket.targetAmount > 0 ? (pocket.currentAmount / pocket.targetAmount) * 100 : 0
+    let status: MoneyPocket['status'] = 'just-started'
+    if (progress >= 100) status = 'completed'
+    else if (progress >= 75) status = 'on-track'
+    else if (progress >= 50) status = 'on-track'
+    else if (progress >= 25) status = 'behind'
+    else status = 'just-started'
+
+    const result = await addPocket({
+      ...pocket,
+      status,
+    })
+    if (result.success) {
+      setShowAddModal(false)
+      await fetchMoneyPockets()
+    }
+  }
+
+  const handleEditSave = async (id: string, pocket: {
+    name: string
+    icon: string
+    currentAmount: number
+    targetAmount: number
+  }) => {
+    const progress =
+      pocket.targetAmount > 0 ? (pocket.currentAmount / pocket.targetAmount) * 100 : 0
+    let status: MoneyPocket['status'] = 'just-started'
+    if (progress >= 100) status = 'completed'
+    else if (progress >= 50) status = 'on-track'
+    else if (progress >= 25) status = 'behind'
+    else status = 'just-started'
+
+    const result = await editPocket(id, {
+      ...pocket,
+      status,
+    })
+    if (result.success) {
+      setShowEditModal(false)
+      setEditingPocket(null)
+      await fetchMoneyPockets()
+    }
+  }
+
+  const handleDeleteConfirm = async (id: string) => {
+    const result = await deletePocket(id)
+    if (result.success) {
+      setShowDeleteModal(false)
+      setDeletingPocket(null)
+      await fetchMoneyPockets()
+    }
+  }
+
+  const handleEditClick = (pocket: MoneyPocket) => {
+    setEditingPocket(pocket)
+    setShowEditModal(true)
+  }
+
+  const handleDeleteClick = (pocket: MoneyPocket) => {
+    setDeletingPocket(pocket)
+    setShowDeleteModal(true)
+  }
+
+  const getProgress = (pocket: MoneyPocket) => {
+    if (pocket.targetAmount <= 0) return 0
+    return Math.min(100, (pocket.currentAmount / pocket.targetAmount) * 100)
+  }
 
   return (
     <motion.div
@@ -52,14 +134,31 @@ export function MoneyPockets() {
               Money Pockets
             </CardTitle>
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-workspace/10 text-workspace">
-              <Target size={16} />
+              <Wallet size={16} />
             </div>
           </div>
         </CardHeader>
 
         <CardContent>
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-sm font-medium text-text-secondary">
+              {pockets.length} {pockets.length === 1 ? 'pocket' : 'pockets'}
+            </h3>
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => setShowAddModal(true)}
+              className={cn(
+                'flex items-center gap-2 rounded-xl border border-transparent bg-gradient-to-r from-purple-500 to-indigo-600 px-4 py-2 text-sm font-medium text-white transition-all hover:from-purple-600 hover:to-indigo-700'
+              )}
+            >
+              <Plus size={16} />
+              Add Pocket
+            </motion.button>
+          </div>
+
           <motion.div
-            className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4"
+            className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4"
             initial="hidden"
             animate="visible"
             variants={{
@@ -71,102 +170,133 @@ export function MoneyPockets() {
               },
             }}
           >
-            {moneyPockets.map((pocket) => {
-              const progress = Math.min(
-                100,
-                (pocket.currentAmount / pocket.targetAmount) * 100
-              )
-              const statusConfig = statusColors[pocket.status]
+            {pockets.map((pocket) => (
+              <motion.div
+                key={pocket.id}
+                variants={cardVariants}
+                whileHover={{ y: -4, scale: 1.02 }}
+                className={cn(
+                  'group relative overflow-hidden rounded-2xl border border-border/50 bg-secondary/30 p-5 transition-all duration-300'
+                )}
+              >
+                <div className="absolute inset-0 -z-10">
+                  <div
+                    className={cn(
+                      'absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500',
+                      currentWorkspace.theme === 'green'
+                        ? 'bg-gradient-to-br from-sri-500/5 to-transparent'
+                        : 'bg-gradient-to-br from-indo-500/5 to-transparent'
+                    )}
+                  />
+                </div>
 
-              return (
-                <motion.div
-                  key={pocket.id}
-                  variants={cardVariants}
-                  whileHover={{ y: -4, scale: 1.02 }}
-                  className={cn(
-                    'group relative overflow-hidden rounded-2xl border border-border/50 bg-secondary/30 p-5 transition-all duration-300'
-                  )}
-                >
-                  <div className="absolute inset-0 -z-10">
-                    <div
-                      className={cn(
-                        'absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500',
-                        currentWorkspace.theme === 'green'
-                          ? 'bg-gradient-to-br from-sri-500/5 to-transparent'
-                          : 'bg-gradient-to-br from-indo-500/5 to-transparent'
-                      )}
-                    />
-                  </div>
-
-                  <div className="mb-4 flex items-center justify-between">
-                    <span className="text-3xl">{pocket.icon}</span>
-                    <span
-                      className={cn(
-                        'inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium',
-                        statusConfig.bg,
-                        statusConfig.text
-                      )}
-                    >
-                      {statusConfig.label}
-                    </span>
-                  </div>
-
-                  <h3 className="text-lg font-semibold text-text">
+                <div className="mb-3 flex items-center gap-3">
+                  <span className="text-3xl">{pocket.icon}</span>
+                  <h3 className="text-base font-semibold text-text">
                     {pocket.name}
                   </h3>
+                </div>
 
-                  <div className="mt-3 space-y-2">
-                    <div className="flex items-baseline justify-between">
-                      <p className="text-2xl font-bold text-text">
-                        {formatCurrencyFull(pocket.currentAmount, currency.code)}
-                      </p>
-                      <p className="text-sm text-text-secondary">
-                        of {formatCurrencyFull(pocket.targetAmount, currency.code)}
-                      </p>
-                    </div>
+                <p className="text-2xl font-bold text-text">
+                  {formatCurrencyFull(pocket.currentAmount, currency.code)}
+                </p>
 
-                    <div className="relative h-2 w-full overflow-hidden rounded-full bg-border/50">
-                      <motion.div
-                        className={cn(
-                          'h-full rounded-full',
-                          currentWorkspace.theme === 'green'
-                            ? 'bg-gradient-to-r from-sri-400 to-sri-600'
-                            : 'bg-gradient-to-r from-indo-400 to-indo-600'
-                        )}
-                        style={{ width: `${progress}%` }}
-                        initial={{ width: 0 }}
-                        animate={{ width: `${progress}%` }}
-                        transition={{ duration: 0.8, ease: 'easeOut' }}
-                      />
-                      <div
-                        className={cn(
-                          'absolute inset-0 rounded-full'
-                        )}
-                        style={{
-                          background: `linear-gradient(to right, transparent ${progress}%, hsla(0,0%,100%,0.05) ${progress}%, transparent ${progress}%)`,
-                        }}
-                      />
-                    </div>
-
-                    <div className="flex justify-between">
-                      <span className="text-xs text-text-tertiary">
-                        {Math.round(progress)}% saved
-                      </span>
-                      <span className="text-xs font-medium text-text-secondary">
-                        {formatCurrencyFull(
-                          pocket.targetAmount - pocket.currentAmount,
-                          currency.code
-                        )}{' '}
-                        left
-                      </span>
-                    </div>
+                <div className="mt-3 space-y-2">
+                  <div className="flex items-center justify-between text-xs text-text-secondary">
+                    <span>
+                      Target: {formatCurrencyFull(pocket.targetAmount, currency.code)}
+                    </span>
+                    <span>
+                      {Math.round(getProgress(pocket))}%
+                    </span>
                   </div>
-                </motion.div>
-              )
-            })}
+                  <div className="h-2 w-full overflow-hidden rounded-full bg-border/50">
+                    <motion.div
+                      className="h-full rounded-full"
+                      style={{
+                        width: `${getProgress(pocket)}%`,
+                        backgroundColor: theme === 'green'
+                          ? (pocket.status === 'completed'
+                              ? '#22c55e'
+                              : pocket.status === 'behind'
+                                ? '#ef4444'
+                                : pocket.status === 'just-started'
+                                  ? '#f97316'
+                                  : '#eab308')
+                          : (pocket.status === 'completed'
+                              ? '#3b82f6'
+                              : pocket.status === 'behind'
+                                ? '#ef4444'
+                                : pocket.status === 'just-started'
+                                  ? '#f97316'
+                                  : '#eab308'),
+                      }}
+                      initial={{ width: 0 }}
+                      animate={{ width: `${getProgress(pocket)}%` }}
+                      transition={{ duration: 0.5, ease: 'easeOut' }}
+                    />
+                  </div>
+                </div>
+
+                <div className="mt-3 flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <motion.button
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.9 }}
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      handleEditClick(pocket)
+                    }}
+                    className={cn(
+                      'flex h-7 w-7 items-center justify-center rounded-lg text-text-tertiary transition-all hover:bg-secondary hover:text-text'
+                    )}
+                  >
+                    <Pencil size={14} />
+                  </motion.button>
+                  <motion.button
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.9 }}
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      handleDeleteClick(pocket)
+                    }}
+                    className={cn(
+                      'flex h-7 w-7 items-center justify-center rounded-lg text-text-tertiary transition-all hover:bg-error-500/10 hover:text-error-500'
+                    )}
+                  >
+                    <Trash2 size={14} />
+                  </motion.button>
+                </div>
+              </motion.div>
+            ))}
           </motion.div>
         </CardContent>
       </Card>
+
+      <AddPocketModal
+        open={showAddModal}
+        onClose={() => setShowAddModal(false)}
+        onSave={handleAddSave}
+      />
+
+      <EditPocketModal
+        open={showEditModal}
+        onClose={() => {
+          setShowEditModal(false)
+          setEditingPocket(null)
+        }}
+        pocket={editingPocket}
+        onSave={handleEditSave}
+      />
+
+      <DeleteConfirmation
+        open={showDeleteModal}
+        onClose={() => {
+          setShowDeleteModal(false)
+          setDeletingPocket(null)
+        }}
+        pocket={deletingPocket}
+        onConfirm={handleDeleteConfirm}
+      />
     </motion.div>
   )
 }

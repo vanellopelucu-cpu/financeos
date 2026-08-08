@@ -12,6 +12,7 @@ import { TodaysTransactions } from './components/TodaysTransactions'
 import { HeroBalanceCard } from './components/HeroBalanceCard'
 import { UpcomingBillsReminder } from './components/UpcomingBillsReminder'
 import { cn } from '../../lib/utils'
+import { DashboardFooter } from './components/DashboardFooter'
 
 const containerVariants: Variants = {
   hidden: { opacity: 0 },
@@ -214,6 +215,8 @@ export function Dashboard() {
       <motion.div variants={rowVariants}>
         <RecentTransactions />
       </motion.div>
+
+      <DashboardFooter />
     </motion.div>
   )
 }

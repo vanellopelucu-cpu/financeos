@@ -28,6 +28,7 @@ export interface Transaction {
   date: string
   amount: number
   icon?: string
+  createdAt?: string
 }
 
 export interface Bill {
