@@ -19,7 +19,7 @@ create extension if not exists "uuid-ossp";
 -- ============================================================
 create table profiles (
   id uuid default uuid_generate_v4() primary key,
-  workspace text not null unique check (workspace in ('indonesia', 'srilanka')),
+    workspace text not null unique check (workspace in ('indonesia', 'srilanka')),
   available_balance numeric not null default 0,
   income numeric not null default 0,
   expenses numeric not null default 0,
@@ -62,6 +62,8 @@ create table bills (
   status text not null default 'unpaid' check (status in ('unpaid', 'paid')),
   icon text,
   provider text,
+  recurring boolean not null default false,
+  category text,
   created_at timestamp with time zone default now() not null,
   updated_at timestamp with time zone default now() not null,
   foreign key (workspace) references profiles (workspace) on delete cascade

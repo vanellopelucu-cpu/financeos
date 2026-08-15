@@ -121,7 +121,7 @@ export function EditPocketModal({ open, onClose, pocket, onSave }: EditPocketMod
 
 interface EditPocketFormProps {
   pocket: MoneyPocket
-  currency: { code: 'LKR' | 'IDR'; symbol: string; name: string }
+  currency: { code: 'LKR' | 'IDR' | 'USD'; symbol: string; name: string }
   onSave: (id: string, pocket: {
     name: string
     icon: string

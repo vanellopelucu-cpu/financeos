@@ -5,9 +5,12 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
-export function formatCurrency(amount: number, currency: 'LKR' | 'IDR'): string {
-  const symbol = currency === 'LKR' ? 'Rs' : 'Rp'
-  const locale = currency === 'LKR' ? 'en-LK' : 'id-ID'
+export function formatCurrency(amount: number, currency: 'LKR' | 'IDR' | 'USD'): string {
+  let symbol: string
+  let locale: string
+  if (currency === 'LKR') { symbol = 'Rs'; locale = 'en-LK' }
+  else if (currency === 'IDR') { symbol = 'Rp'; locale = 'id-ID' }
+  else { symbol = '$'; locale = 'en-US' }
   return new Intl.NumberFormat(locale, {
     style: 'currency',
     currency,
@@ -16,13 +19,28 @@ export function formatCurrency(amount: number, currency: 'LKR' | 'IDR'): string 
   }).format(Math.abs(amount)).replace(currency, symbol)
 }
 
-export function formatCurrencyFull(amount: number, currency: 'LKR' | 'IDR'): string {
-  const symbol = currency === 'LKR' ? 'Rs' : 'Rp'
-  const abs = Math.abs(amount)
-  const formatted = new Intl.NumberFormat(currency === 'LKR' ? 'en-LK' : 'id-ID', {
-    maximumFractionDigits: 0,
-  }).format(abs)
+export function formatCurrencyFull(amount: number, currency: 'LKR' | 'IDR' | 'USD'): string {
+  let symbol: string
+  let abs: number
+  let formatted: string
+  if (currency === 'LKR') { symbol = 'Rs'; abs = Math.abs(amount); formatted = new Intl.NumberFormat('en-LK', { maximumFractionDigits: 0 }).format(abs) }
+  else if (currency === 'IDR') { symbol = 'Rp'; abs = Math.abs(amount); formatted = new Intl.NumberFormat('en-LK', { maximumFractionDigits: 0 }).format(abs) }
+  else { symbol = '$'; abs = Math.abs(amount); formatted = new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 }).format(abs) }
   return `${symbol}${formatted}`
+}
+
+export function formatRupiah(amount: number): string {
+  const abs = Math.abs(amount)
+  const formatted = new Intl.NumberFormat('id-ID', { maximumFractionDigits: 0 }).format(abs)
+  return `Rp${formatted}`
+}
+
+export function formatRupiahCompact(amount: number): string {
+  const abs = Math.abs(amount)
+  if (abs >= 1000000000) return `Rp ${(abs / 1000000000).toFixed(1)}M`
+  if (abs >= 1000000) return `Rp ${(abs / 1000000).toFixed(1)}Jt`
+  if (abs >= 1000) return `Rp ${(abs / 1000).toFixed(0)}Rb`
+  return formatRupiah(abs)
 }
 
 export function formatNumber(amount: number): string {

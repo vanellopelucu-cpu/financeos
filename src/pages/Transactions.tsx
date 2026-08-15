@@ -4,16 +4,18 @@ import {
   ChevronLeft,
   ChevronRight,
   CreditCard,
-  Filter,
+  Download,
   Search,
   TrendingDown,
   TrendingUp,
   Trash2,
+  Plus,
 } from 'lucide-react'
 import { useWorkspace } from '../app/providers/WorkspaceContext'
 import { useDashboardStore } from '../app/store'
 import { Badge } from '../components/ui/Badge'
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/Card'
+import { AddTransactionModal } from '../components/AddTransactionModal'
 import { cn, formatCurrencyFull, getCategoryIcon } from '../lib/utils'
 import type { Transaction } from '../lib/types'
 
@@ -79,6 +81,9 @@ export function Transactions() {
   ).sort()
 
   const today = new Date()
+
+  const [showAddTransaction, setShowAddTransaction] = useState(false)
+  const { addTransaction, fetchTransactions, fetchAnalytics } = useDashboardStore()
 
   const filterByDate = (tx: Transaction): boolean => {
     if (dateFilter === 'all') return true
@@ -152,6 +157,38 @@ export function Transactions() {
     typeFilter !== 'all' ||
     dateFilter !== 'all'
 
+  const exportToCSV = () => {
+    const headers = ['Date', 'Description', 'Category', 'Type', 'Amount', 'Currency', 'Workspace']
+    const rows = filteredTransactions.map((tx) => [
+      tx.date,
+      tx.description,
+      tx.category,
+      tx.amount >= 0 ? 'Income' : 'Expense',
+      tx.amount,
+      currency.code,
+      currentWorkspace.name,
+    ])
+    const csvContent = [headers, ...rows]
+      .map((row) =>
+        row
+          .map((val) => {
+            const escaped = String(val).replace(/"/g, '""')
+            return `"${escaped}"`
+          })
+          .join(',')
+      )
+      .join('\n')
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.setAttribute('download', `transactions-${currentWorkspace.id}.csv`)
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    URL.revokeObjectURL(url)
+  }
+
   return (
     <motion.div
       variants={containerVariants}
@@ -160,13 +197,27 @@ export function Transactions() {
       className="flex flex-col gap-6"
     >
       {/* Page Header */}
-      <motion.div variants={itemVariants} className="flex items-center gap-3">
-        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-workspace/10 text-workspace">
-          <CreditCard size={16} />
+      <motion.div variants={itemVariants} className="flex items-center justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-workspace/10 text-workspace">
+            <CreditCard size={16} />
+          </div>
+          <h1 className="text-3xl font-bold tracking-tight text-text">
+            Transactions
+          </h1>
         </div>
-        <h1 className="text-3xl font-bold tracking-tight text-text">
-          Transactions
-        </h1>
+
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={() => setShowAddTransaction(true)}
+          className={cn(
+            'flex items-center gap-2 rounded-xl bg-workspace px-4 py-2 text-sm font-medium text-white transition-all duration-300 hover:bg-workspace-hover'
+          )}
+        >
+          <Plus size={16} />
+          + Tambah Catatan
+        </motion.button>
       </motion.div>
 
       {/* Summary Cards */}
@@ -324,11 +375,12 @@ export function Transactions() {
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
+                  onClick={exportToCSV}
                   className={cn(
                     'flex items-center gap-1.5 rounded-xl bg-workspace px-4 py-1.5 text-sm font-medium text-white transition-colors hover:bg-workspace-hover'
                   )}
                 >
-                  <Filter size={14} />
+                  <Download size={14} />
                   Export
                 </motion.button>
               </div>
@@ -517,6 +569,19 @@ export function Transactions() {
           </CardContent>
         </Card>
       </motion.div>
+
+      <AddTransactionModal
+        open={showAddTransaction}
+        onClose={() => setShowAddTransaction(false)}
+        onSave={async (transaction) => {
+          const result = await addTransaction(transaction)
+          if (result.success) {
+            setShowAddTransaction(false)
+            await fetchTransactions()
+            await fetchAnalytics()
+          }
+        }}
+      />
     </motion.div>
   )
 }

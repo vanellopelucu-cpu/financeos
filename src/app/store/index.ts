@@ -39,9 +39,13 @@ export interface DashboardState {
   fetchAccounts: () => Promise<void>
   fetchAnalytics: () => Promise<void>
   fetchBudgets: () => Promise<void>
-  addPocket: (pocket: Omit<MoneyPocket, 'id'>) => Promise<{ success: boolean; error?: string }>
+   addPocket: (pocket: Omit<MoneyPocket, 'id'>) => Promise<{ success: boolean; error?: string }>
   editPocket: (id: string, pocket: Partial<Omit<MoneyPocket, 'id'>>) => Promise<{ success: boolean; error?: string }>
   deletePocket: (id: string) => Promise<{ success: boolean; error?: string }>
+  addBill: (bill: Omit<Bill, 'id'>) => Promise<{ success: boolean; error?: string }>
+  editBill: (id: string, bill: Partial<Omit<Bill, 'id'>>) => Promise<{ success: boolean; error?: string }>
+  deleteBill: (id: string) => Promise<{ success: boolean; error?: string }>
+  addTransaction: (transaction: Omit<Transaction, 'id'>) => Promise<{ success: boolean; error?: string }>
 }
 
 export const useDashboardStore = create<DashboardState>()(
@@ -152,7 +156,7 @@ export const useDashboardStore = create<DashboardState>()(
           try {
             const { data, error } = await supabase
               .from('bills')
-              .select('id, title, amount, due_date, icon, provider')
+              .select('id, title, amount, due_date, icon, provider, status')
               .eq('workspace', workspace)
               .order('due_date', { ascending: true })
 
@@ -172,6 +176,9 @@ export const useDashboardStore = create<DashboardState>()(
                 dueDate: row.due_date,
                 icon: row.icon,
                 provider: row.provider,
+                status: row.status || 'unpaid',
+                recurring: row.recurring || false,
+                category: row.category || null,
               }))
               set({ upcomingBills: mapped })
             }
@@ -329,6 +336,181 @@ export const useDashboardStore = create<DashboardState>()(
           } catch (err) {
             console.error('Error deleting pocket:', err)
             return { success: false, error: 'Failed to delete pocket.' }
+          }
+        },
+
+        addBill: async (bill) => {
+          const workspace = get().currentWorkspace
+
+          if (!isSupabaseConfigured) {
+            const { upcomingBills } = get()
+            const newBill: Bill = {
+              id: `temp-${Date.now()}`,
+              ...bill,
+            }
+            set({ upcomingBills: [...upcomingBills, newBill] })
+            return { success: true }
+          }
+
+          try {
+            const { error } = await supabase
+              .from('bills')
+              .insert({
+                workspace,
+                title: bill.title,
+                amount: bill.amount,
+                currency: WORKSPACES.find((w) => w.id === workspace)?.currency.code || 'IDR',
+                due_date: bill.dueDate,
+                status: bill.status || 'unpaid',
+                icon: bill.icon || '📄',
+                provider: bill.provider || null,
+              })
+
+            if (error) {
+              console.error('Failed to add bill:', error)
+              return { success: false, error: 'Failed to add bill.' }
+            }
+
+            await get().fetchBills()
+            return { success: true }
+          } catch (err) {
+            console.error('Error adding bill:', err)
+            return { success: false, error: 'Failed to add bill.' }
+          }
+        },
+
+        editBill: async (id, bill) => {
+          if (!isSupabaseConfigured) {
+            const { upcomingBills } = get()
+            const updated = upcomingBills.map((b) =>
+              b.id === id ? { ...b, ...bill } : b
+            )
+            set({ upcomingBills: updated })
+            return { success: true }
+          }
+
+          try {
+            const { error } = await supabase
+              .from('bills')
+              .update({
+                title: bill.title,
+                amount: bill.amount,
+                due_date: bill.dueDate,
+                status: bill.status,
+                icon: bill.icon,
+                provider: bill.provider,
+              })
+              .eq('id', id)
+
+            if (error) {
+              console.error('Failed to edit bill:', error)
+              return { success: false, error: 'Failed to edit bill.' }
+            }
+
+            await get().fetchBills()
+            return { success: true }
+          } catch (err) {
+            console.error('Error editing bill:', err)
+            return { success: false, error: 'Failed to edit bill.' }
+          }
+        },
+
+        deleteBill: async (id) => {
+          if (!isSupabaseConfigured) {
+            const { upcomingBills } = get()
+            set({ upcomingBills: upcomingBills.filter((b) => b.id !== id) })
+            return { success: true }
+          }
+
+          try {
+            const { error } = await supabase
+              .from('bills')
+              .delete()
+              .eq('id', id)
+
+            if (error) {
+              console.error('Failed to delete bill:', error)
+              return { success: false, error: 'Failed to delete bill.' }
+            }
+
+             await get().fetchBills()
+            return { success: true }
+          } catch (err) {
+            console.error('Error deleting bill:', err)
+            return { success: false, error: 'Failed to delete bill.' }
+          }
+        },
+
+        addTransaction: async (transaction) => {
+          const workspace = get().currentWorkspace
+
+          if (!isSupabaseConfigured) {
+            const { transactions } = get()
+            const newTransaction: Transaction = {
+              id: `tx-temp-${Date.now()}`,
+              ...transaction,
+            }
+            set({ transactions: [newTransaction, ...transactions] })
+
+            set((state) => ({
+              balance: {
+                ...state.balance,
+                income:
+                  transaction.amount >= 0
+                    ? state.balance.income + transaction.amount
+                    : state.balance.income,
+                expenses:
+                  transaction.amount < 0
+                    ? state.balance.expenses + Math.abs(transaction.amount)
+                    : state.balance.expenses,
+                availableBalance: state.balance.availableBalance + transaction.amount,
+                remaining: state.balance.remaining + transaction.amount,
+              },
+            }))
+
+            return { success: true }
+          }
+
+          try {
+            const { error } = await supabase
+              .from('transactions')
+              .insert({
+                workspace,
+                description: transaction.description,
+                category: transaction.category,
+                date: transaction.date,
+                amount: transaction.amount,
+                icon: transaction.icon,
+              })
+
+            if (error) {
+              console.error('Failed to add transaction:', error)
+              return { success: false, error: 'Failed to save transaction.' }
+            }
+
+            const { data: profileData, error: profileError } = await supabase
+              .from('profiles')
+              .select('available_balance')
+              .eq('workspace', workspace)
+              .single()
+
+            if (!profileError && profileData) {
+              const currentBalance = Number(profileData.available_balance)
+              const newBalance = currentBalance + transaction.amount
+
+              await supabase
+                .from('profiles')
+                .update({ available_balance: newBalance })
+                .eq('workspace', workspace)
+            }
+
+            await get().fetchTransactions()
+            await get().fetchAnalytics()
+
+            return { success: true }
+          } catch (err) {
+            console.error('Error adding transaction:', err)
+            return { success: false, error: 'Failed to save transaction.' }
           }
         },
 

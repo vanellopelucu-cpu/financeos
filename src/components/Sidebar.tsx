@@ -8,7 +8,8 @@ import {
   Settings,
   Wallet,
 } from 'lucide-react'
-import { Link, useLocation } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { useAuth } from '../app/providers/AuthContext'
 import { cn } from '../lib/utils'
 import { WorkspaceSwitcher } from './WorkspaceSwitcher'
 
@@ -26,10 +27,18 @@ const navItems: NavItem[] = [
   { label: 'Analytics', href: '/analytics', icon: <BarChart3 size={20} /> },
   { label: 'Accounts', href: '/accounts', icon: <Wallet size={20} /> },
   { label: 'Notifications', href: '/notifications', icon: <Bell size={20} /> },
+  { label: 'Bills', href: '/bills', icon: <CreditCard size={20} /> },
 ]
 
 export function Sidebar() {
   const location = useLocation()
+  const navigate = useNavigate()
+  const { signOut } = useAuth()
+
+  const handleSignOut = async () => {
+    await signOut()
+    navigate('/login', { replace: true })
+  }
 
   return (
     <aside className="fixed inset-y-0 left-0 z-40 hidden w-64 flex-col gap-y-7 overflow-y-auto border-r border-border bg-surface p-4 shadow-soft dark:shadow-soft-dark md:flex">
@@ -85,6 +94,7 @@ export function Sidebar() {
         </Link>
         <button
           type="button"
+          onClick={handleSignOut}
           className={cn(
             'mt-1 flex w-full items-center gap-3 rounded-2xl px-3 py-2.5 text-sm font-medium text-error-500 transition-all duration-300 hover:bg-error-100/50'
           )}

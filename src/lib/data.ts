@@ -63,6 +63,9 @@ export const UPCOMING_BILLS: Record<string, Bill[]> = {
       dueDate: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000).toISOString(),
       icon: '🎬',
       provider: 'Netflix',
+      status: 'unpaid',
+      recurring: true,
+      category: 'Bills & Utilities',
     },
     {
       id: 'bill-2',
@@ -71,6 +74,9 @@ export const UPCOMING_BILLS: Record<string, Bill[]> = {
       dueDate: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString(),
       icon: '💡',
       provider: 'CEB',
+      status: 'unpaid',
+      recurring: true,
+      category: 'Bills & Utilities',
     },
     {
       id: 'bill-3',
@@ -79,6 +85,9 @@ export const UPCOMING_BILLS: Record<string, Bill[]> = {
       dueDate: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString(),
       icon: '📶',
       provider: 'Dialog',
+      status: 'unpaid',
+      recurring: true,
+      category: 'Bills & Utilities',
     },
     {
       id: 'bill-4',
@@ -87,6 +96,9 @@ export const UPCOMING_BILLS: Record<string, Bill[]> = {
       dueDate: new Date(Date.now() + 10 * 24 * 60 * 60 * 1000).toISOString(),
       icon: '🚰',
       provider: 'NWSDB',
+      status: 'unpaid',
+      recurring: true,
+      category: 'Bills & Utilities',
     },
   ],
   'indonesia': [
@@ -97,6 +109,9 @@ export const UPCOMING_BILLS: Record<string, Bill[]> = {
       dueDate: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000).toISOString(),
       icon: '🎬',
       provider: 'Netflix',
+      status: 'unpaid',
+      recurring: true,
+      category: 'Bills & Utilities',
     },
     {
       id: 'bill-2',
@@ -105,6 +120,9 @@ export const UPCOMING_BILLS: Record<string, Bill[]> = {
       dueDate: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString(),
       icon: '💡',
       provider: 'PLN',
+      status: 'unpaid',
+      recurring: true,
+      category: 'Bills & Utilities',
     },
     {
       id: 'bill-3',
@@ -113,6 +131,9 @@ export const UPCOMING_BILLS: Record<string, Bill[]> = {
       dueDate: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString(),
       icon: '📶',
       provider: 'Telkom',
+      status: 'unpaid',
+      recurring: true,
+      category: 'Bills & Utilities',
     },
     {
       id: 'bill-4',
@@ -121,6 +142,9 @@ export const UPCOMING_BILLS: Record<string, Bill[]> = {
       dueDate: new Date(Date.now() + 10 * 24 * 60 * 60 * 1000).toISOString(),
       icon: '🚰',
       provider: 'PDAM',
+      status: 'unpaid',
+      recurring: true,
+      category: 'Bills & Utilities',
     },
   ],
 }

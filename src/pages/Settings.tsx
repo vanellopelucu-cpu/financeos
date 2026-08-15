@@ -7,20 +7,18 @@ import {
   Database,
   Download,
   Globe,
-  Key,
-  Lock,
-  LogOut,
   Moon,
   Save,
   Settings as SettingsIcon,
   Shield,
-  Smartphone,
   Sun,
   Trash2,
+  Upload,
   User,
 } from 'lucide-react'
 import { useTheme } from '../app/providers/ThemeContext'
 import { useWorkspace } from '../app/providers/WorkspaceContext'
+import { useAuth } from '../app/providers/AuthContext'
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/Card'
 import { Badge } from '../components/ui/Badge'
 import { cn } from '../lib/utils'
@@ -44,15 +42,90 @@ const cardVariants: Variants = {
 }
 
 function Profile() {
+  const { user, updateUser, uploadAvatar } = useAuth()
   const { currentWorkspace } = useWorkspace()
+  const displayName = user?.user_metadata?.display_name || ''
+  const email = user?.email || 'user@example.com'
+  const avatarUrl = user?.user_metadata?.avatar_url || ''
+
+  const [name, setName] = useState(displayName)
+  const [photo, setPhoto] = useState(avatarUrl)
+  const [photoFile, setPhotoFile] = useState<File | null>(null)
+  const [saving, setSaving] = useState(false)
+  const [saved, setSaved] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [preview, setPreview] = useState<string | null>(null)
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp']
+    if (!validTypes.includes(file.type)) {
+      setError('Please select a valid image file (JPG, PNG, WEBP).')
+      return
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      setError('File size must be less than 5MB.')
+      return
+    }
+
+    setError(null)
+    setPhotoFile(file)
+    const url = URL.createObjectURL(file)
+    setPreview(url)
+  }
+
+  const handleSave = async () => {
+    setSaving(true)
+    setError(null)
+    setSaved(false)
+
+    let avatarUrlResult = photo
+    if (photoFile) {
+      const uploadResult = await uploadAvatar(photoFile)
+      if (uploadResult.error) {
+        setError(uploadResult.error)
+        setSaving(false)
+        return
+      }
+      avatarUrlResult = uploadResult.url || photo
+      setPhoto(avatarUrlResult)
+    }
+
+    const result = await updateUser({
+      data: {
+        display_name: name.trim(),
+        avatar_url: avatarUrlResult,
+      },
+    })
+
+    if (result.error) {
+      setError(result.error)
+      setSaving(false)
+      return
+    }
+
+    setSaved(true)
+    setSaving(false)
+    setPhotoFile(null)
+    setPreview(null)
+    setTimeout(() => setSaved(false), 3000)
+  }
 
   return (
     <motion.div variants={rowVariants}>
       <Card glass elevated className="border-0 p-0 shadow-xl">
         <CardHeader className="border-b border-border/50 pb-4">
-          <CardTitle className="text-sm font-medium uppercase tracking-wider text-text-secondary">
-            Profile
-          </CardTitle>
+          <div className="flex items-center gap-3">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-workspace/10 text-workspace">
+              <User size={16} />
+            </div>
+            <CardTitle className="text-sm font-medium uppercase tracking-wider text-text-secondary">
+              Profile
+            </CardTitle>
+          </div>
         </CardHeader>
 
         <CardContent className="p-6">
@@ -68,28 +141,49 @@ function Profile() {
               variants={cardVariants}
               className="flex flex-shrink-0 flex-col items-center gap-3"
             >
-              <div className="flex h-24 w-24 items-center justify-center rounded-full bg-gradient-to-br from-workspace to-workspace-hover text-4xl text-white shadow-xl">
-                👤
-              </div>
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.98 }}
-                className={cn(
-                  'rounded-lg border border-border bg-secondary px-4 py-2 text-sm font-medium text-text-secondary transition-all hover:bg-border'
+              <div className="relative flex h-24 w-24 items-center justify-center rounded-full bg-gradient-to-br from-workspace to-workspace-hover text-4xl text-white shadow-xl overflow-hidden">
+                {preview ? (
+                  <img src={preview} alt="Preview" className="h-full w-full object-cover" />
+                ) : photo ? (
+                  <img src={photo} alt="Profile" className="h-full w-full object-cover" />
+                ) : (
+                  '👤'
                 )}
-              >
-                Change Photo
-              </motion.button>
+              </div>
+              <label className="cursor-pointer">
+                <input
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  onChange={handleFileChange}
+                  className="hidden"
+                />
+                <motion.div
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.98 }}
+                  className={cn(
+                    'flex items-center justify-center gap-2 rounded-lg border border-border bg-secondary px-4 py-2 text-sm font-medium text-text-secondary transition-all hover:bg-border'
+                  )}
+                >
+                  <Upload size={16} />
+                  Change Photo
+                </motion.div>
+              </label>
             </motion.div>
 
-            <div className="flex-1 space-y-4">
+            <div className="flex-1 space-y-4 w-full">
               <motion.div variants={cardVariants}>
                 <p className="text-xs font-medium uppercase tracking-wider text-text-tertiary">
-                  Full Name
+                  Display Name
                 </p>
-                <p className="mt-1 text-xl font-semibold text-text">
-                  Alex Johnson
-                </p>
+                <input
+                  type="text"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  className={cn(
+                    'mt-1 w-full rounded-xl border border-border bg-secondary/50 px-3 py-2 text-sm text-text placeholder:text-text-tertiary focus:border-workspace focus:outline-none'
+                  )}
+                  placeholder="Enter your name"
+                />
               </motion.div>
 
               <motion.div variants={cardVariants}>
@@ -97,7 +191,7 @@ function Profile() {
                   Email
                 </p>
                 <p className="mt-1 text-xl font-semibold text-text">
-                  alex.johnson@example.com
+                  {email}
                 </p>
               </motion.div>
 
@@ -115,36 +209,39 @@ function Profile() {
                   Member Since
                 </p>
                 <p className="mt-1 text-xl font-semibold text-text">
-                  January 15, 2024
+                  {user?.user_metadata?.created_at
+                    ? new Date(user.user_metadata.created_at).toLocaleDateString('en-US', {
+                        weekday: 'long',
+                        month: 'long',
+                        day: 'numeric',
+                        year: 'numeric',
+                      })
+                    : 'January 15, 2024'}
                 </p>
               </motion.div>
-            </div>
 
-            <motion.div
-              variants={cardVariants}
-              className="flex flex-shrink-0 flex-col gap-3"
-            >
-              <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                className={cn(
-                  'flex items-center justify-center gap-2 rounded-xl border border-border bg-secondary px-4 py-2.5 text-sm font-medium text-text transition-all hover:bg-border'
-                )}
-              >
-                <User size={16} />
-                Edit Profile
-              </motion.button>
-              <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                className={cn(
-                  'flex items-center justify-center gap-2 rounded-xl border border-border bg-secondary px-4 py-2.5 text-sm font-medium text-text transition-all hover:bg-border'
-                )}
-              >
-                <Key size={16} />
-                Change Password
-              </motion.button>
-            </motion.div>
+              {error && (
+                <p className="text-sm text-red-500">{error}</p>
+              )}
+              {saved && (
+                <p className="text-sm text-green-500">Saved!</p>
+              )}
+
+              <motion.div variants={cardVariants} className="pt-2">
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={handleSave}
+                  disabled={saving || (!name.trim() && !photoFile)}
+                  className={cn(
+                    'flex w-full items-center justify-center gap-2 rounded-xl border border-transparent bg-gradient-to-r from-purple-500 to-indigo-600 px-5 py-2.5 text-sm font-medium text-white transition-all hover:from-purple-600 hover:to-indigo-700 disabled:opacity-50'
+                  )}
+                >
+                  <Save size={16} />
+                  {saving ? 'Saving...' : 'Save Changes'}
+                </motion.button>
+              </motion.div>
+            </div>
           </motion.div>
         </CardContent>
       </Card>
@@ -491,44 +588,46 @@ function Notifications() {
 }
 
 function Security() {
-  const securityItems = [
-    {
-      id: 'password',
-      icon: <Lock size={20} />,
-      title: 'Change Password',
-      desc: 'Update your account password',
-      status: 'Configured',
-      statusType: 'success' as const,
-      action: 'Update',
-    },
-    {
-      id: '2fa',
-      icon: <Shield size={20} />,
-      title: 'Two-Factor Authentication',
-      desc: 'Add extra security to your account',
-      status: 'Not Enabled',
-      statusType: 'warning' as const,
-      action: 'Enable',
-    },
-    {
-      id: 'sessions',
-      icon: <LogOut size={20} />,
-      title: 'Active Sessions',
-      desc: 'Manage your logged-in devices',
-      status: '3 Active',
-      statusType: 'default' as const,
-      action: 'View',
-    },
-    {
-      id: 'devices',
-      icon: <Smartphone size={20} />,
-      title: 'Connected Devices',
-      desc: 'Devices linked to your account',
-      status: '2 Devices',
-      statusType: 'default' as const,
-      action: 'Manage',
-    },
-  ]
+  const { updateUser } = useAuth()
+  const [currentPassword, setCurrentPassword] = useState('')
+  const [newPassword, setNewPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
+  const [saving, setSaving] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [success, setSuccess] = useState(false)
+
+  const handleChangePassword = async () => {
+    if (!newPassword.trim()) {
+      setError('New password cannot be empty.')
+      return
+    }
+    if (newPassword !== confirmPassword) {
+      setError('New password and confirmation must match.')
+      return
+    }
+    if (newPassword.length < 6) {
+      setError('Password must be at least 6 characters.')
+      return
+    }
+
+    setSaving(true)
+    setError(null)
+    setSuccess(false)
+
+    const result = await updateUser({ password: newPassword })
+    if (result.error) {
+      setError(result.error)
+      setSaving(false)
+      return
+    }
+
+    setSuccess(true)
+    setSaving(false)
+    setCurrentPassword('')
+    setNewPassword('')
+    setConfirmPassword('')
+    setTimeout(() => setSuccess(false), 3000)
+  }
 
   return (
     <motion.div variants={rowVariants}>
@@ -553,47 +652,73 @@ function Security() {
               visible: { transition: { staggerChildren: 0.1, delayChildren: 0.1 } },
             }}
           >
-            {securityItems.map((item) => (
-              <motion.div
-                key={item.id}
-                variants={cardVariants}
-                whileHover={{ x: 4 }}
-                className="flex items-center justify-between rounded-xl border border-border/50 bg-secondary/30 p-4 transition-all"
-              >
-                <div className="flex items-center gap-4">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-secondary">
-                    {item.icon}
-                  </div>
-                  <div>
-                    <p className="font-medium text-text">{item.title}</p>
-                    <p className="text-sm text-text-secondary">{item.desc}</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3">
-                  <Badge
-                    variant={
-                      item.statusType === 'success'
-                        ? 'success'
-                        : item.statusType === 'warning'
-                          ? 'warning'
-                          : 'secondary'
-                    }
-                    size="sm"
-                  >
-                    {item.status}
-                  </Badge>
-                  <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.98 }}
+            <motion.div variants={cardVariants}>
+              <div className="space-y-3">
+                <div>
+                  <label className="block text-sm font-medium text-text-secondary">
+                    Current Password
+                  </label>
+                  <input
+                    type="password"
+                    value={currentPassword}
+                    onChange={(e) => setCurrentPassword(e.target.value)}
                     className={cn(
-                      'rounded-lg border border-border bg-secondary px-3 py-1.5 text-sm font-medium text-text-secondary transition-all hover:bg-border'
+                      'mt-1 w-full rounded-xl border border-border bg-secondary/50 px-3 py-2 text-sm text-text placeholder:text-text-tertiary focus:border-workspace focus:outline-none'
                     )}
-                  >
-                    {item.action}
-                  </motion.button>
+                    placeholder="Enter current password"
+                  />
                 </div>
-              </motion.div>
-            ))}
+
+                <div>
+                  <label className="block text-sm font-medium text-text-secondary">
+                    New Password
+                  </label>
+                  <input
+                    type="password"
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    className={cn(
+                      'mt-1 w-full rounded-xl border border-border bg-secondary/50 px-3 py-2 text-sm text-text placeholder:text-text-tertiary focus:border-workspace focus:outline-none'
+                    )}
+                    placeholder="Enter new password"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-text-secondary">
+                    Confirm New Password
+                  </label>
+                  <input
+                    type="password"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    className={cn(
+                      'mt-1 w-full rounded-xl border border-border bg-secondary/50 px-3 py-2 text-sm text-text placeholder:text-text-tertiary focus:border-workspace focus:outline-none'
+                    )}
+                    placeholder="Confirm new password"
+                  />
+                </div>
+              </div>
+            </motion.div>
+
+            {error && (
+              <p className="text-sm text-red-500">{error}</p>
+            )}
+            {success && (
+              <p className="text-sm text-green-500">Password updated successfully.</p>
+            )}
+
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={handleChangePassword}
+              disabled={saving || !newPassword.trim()}
+              className={cn(
+                'flex items-center justify-center gap-2 rounded-xl border border-transparent bg-gradient-to-r from-purple-500 to-indigo-600 px-5 py-2.5 text-sm font-medium text-white transition-all hover:from-purple-600 hover:to-indigo-700 disabled:opacity-50'
+              )}
+            >
+              {saving ? 'Updating...' : 'Update Password'}
+            </motion.button>
           </motion.div>
         </CardContent>
       </Card>

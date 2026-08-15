@@ -3,7 +3,7 @@ import { Trash2, X } from 'lucide-react'
 import { useTheme } from '../../../app/providers/ThemeContext'
 import { Card, CardContent, CardHeader, CardTitle } from '../../../components/ui/Card'
 import { cn } from '../../../lib/utils'
-import type { MoneyPocket } from '../../../lib/types'
+import type { Bill } from '../../../lib/types'
 
 const backdropVariants: Variants = {
   hidden: { opacity: 0 },
@@ -27,22 +27,22 @@ const modalVariants: Variants = {
   },
 }
 
-interface DeleteConfirmationProps {
+interface DeleteBillConfirmationProps {
   open: boolean
   onClose: () => void
-  pocket: MoneyPocket | null
+  bill: Bill | null
   onConfirm: (id: string) => Promise<void>
 }
 
-export function DeleteConfirmation({
+export function DeleteBillConfirmation({
   open,
   onClose,
-  pocket,
+  bill,
   onConfirm,
-}: DeleteConfirmationProps) {
+}: DeleteBillConfirmationProps) {
   const { theme } = useTheme()
 
-  if (!open || !pocket) return null
+  if (!open || !bill) return null
 
   return (
     <motion.div
@@ -69,25 +69,10 @@ export function DeleteConfirmation({
               : 'bg-gradient-to-br from-surface via-surface to-indigo-50/50'
           )}
         >
-          <div className="absolute inset-0 -z-10 overflow-hidden rounded-2xl">
-            <div
-              className={cn(
-                'absolute -top-24 -right-24 h-72 w-72 rounded-full blur-3xl',
-                theme === 'dark' ? 'bg-purple-500/15' : 'bg-indigo-300/20'
-              )}
-            />
-            <div
-              className={cn(
-                'absolute -bottom-20 -left-20 h-64 w-64 rounded-full blur-3xl',
-                theme === 'dark' ? 'bg-indigo-500/10' : 'bg-purple-200/20'
-              )}
-            />
-          </div>
-
           <CardHeader className="border-b border-border/50 pb-4">
             <div className="flex items-center justify-between px-6 pt-6">
                 <CardTitle className="text-lg font-semibold text-text">
-                Delete this pocket?
+                Delete this bill?
               </CardTitle>
               <motion.button
                 whileHover={{ scale: 1.1, rotate: 90 }}
@@ -109,14 +94,11 @@ export function DeleteConfirmation({
               transition={{ duration: 0.3, delay: 0.1, ease: 'easeOut' }}
               className="mb-6 flex items-center gap-4"
             >
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-red-500/10 text-3xl">
-                {pocket.icon}
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl text-2xl">
+                {bill.icon || '📄'}
               </div>
               <div>
-                <p className="font-semibold text-text">{pocket.name}</p>
-                <p className="text-sm text-text-secondary">
-                  This action cannot be undone.
-                </p>
+                <p className="font-semibold text-text">{bill.title}</p>
               </div>
             </motion.div>
 
@@ -140,7 +122,7 @@ export function DeleteConfirmation({
               <motion.button
                 whileHover={{ scale: 1.02, boxShadow: '0 10px 25px -5px rgba(239, 68, 68, 0.3)' }}
                 whileTap={{ scale: 0.98 }}
-                onClick={() => onConfirm(pocket.id)}
+                onClick={() => onConfirm(bill.id)}
                 className={cn(
                   'flex items-center justify-center gap-2 rounded-xl border border-transparent bg-gradient-to-r from-red-500 to-red-600 px-5 py-2.5 text-sm font-medium text-white transition-all duration-200 hover:from-red-600 hover:to-red-700'
                 )}

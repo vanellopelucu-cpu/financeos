@@ -33,19 +33,22 @@ export function MoneyPockets() {
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [editingPocket, setEditingPocket] = useState<MoneyPocket | null>(null)
   const [deletingPocket, setDeletingPocket] = useState<MoneyPocket | null>(null)
+  const [dismissedDefaults, setDismissedDefaults] = useState<Set<string>>(new Set())
 
   const pocketMap = new Map((moneyPockets || []).map((p) => [p.name, p]))
-  const pockets = DEFAULT_POCKETS.map((dp) => {
+  const defaultPocketsMerged = DEFAULT_POCKETS.filter((dp) => !dismissedDefaults.has(dp.id)).map((dp) => {
     const existing = pocketMap.get(dp.name)
+    if (existing) return existing
     return {
-      id: existing?.id || dp.id,
+      id: dp.id,
       name: dp.name,
-      icon: existing?.icon || dp.icon,
-      currentAmount: existing ? existing.currentAmount : 0,
-      targetAmount: existing ? existing.targetAmount : 0,
-      status: existing ? existing.status : 'just-started',
+      icon: dp.icon,
+      currentAmount: 0,
+      targetAmount: 0,
+      status: 'just-started' as const,
     }
   })
+  const pockets = [...defaultPocketsMerged, ...(moneyPockets || []).filter((p) => !DEFAULT_POCKETS.some((dp) => dp.name === p.name))]
 
   const handleAddSave = async (pocket: {
     name: string
@@ -85,6 +88,21 @@ export function MoneyPockets() {
     else if (progress >= 25) status = 'behind'
     else status = 'just-started'
 
+    const isDefaultId = id.startsWith('pocket-')
+
+    if (isDefaultId) {
+      const result = await addPocket({
+        ...pocket,
+        status,
+      })
+      if (result.success) {
+        setShowEditModal(false)
+        setEditingPocket(null)
+        await fetchMoneyPockets()
+      }
+      return
+    }
+
     const result = await editPocket(id, {
       ...pocket,
       status,
@@ -97,6 +115,19 @@ export function MoneyPockets() {
   }
 
   const handleDeleteConfirm = async (id: string) => {
+    const isDefaultId = id.startsWith('pocket-')
+
+    if (isDefaultId) {
+      setShowDeleteModal(false)
+      setDeletingPocket(null)
+      setDismissedDefaults((prev) => {
+        const next = new Set(prev)
+        next.add(id)
+        return next
+      })
+      return
+    }
+
     const result = await deletePocket(id)
     if (result.success) {
       setShowDeleteModal(false)

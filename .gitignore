@@ -26,3 +26,6 @@ dist-ssr
 .env
 .env.*
 bot/.env
+test-results/
+test-results
+tests/

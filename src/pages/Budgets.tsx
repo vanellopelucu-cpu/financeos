@@ -13,6 +13,7 @@ import { useDashboardStore } from '../app/store'
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/Card'
 import { Badge, HealthBadge } from '../components/ui/Badge'
 import { cn, formatCurrencyFull } from '../lib/utils'
+import type { WorkspaceTheme } from '../lib/types'
 
 const containerVariants: Variants = {
   hidden: { opacity: 0 },
@@ -63,7 +64,7 @@ function getStatusColor(status: 'Safe' | 'Warning' | 'Over Budget') {
   }
 }
 
-function getProgressBarColor(progress: number, workspaceTheme: 'green' | 'blue') {
+function getProgressBarColor(progress: number, workspaceTheme: WorkspaceTheme) {
   if (progress >= 100) return 'bg-red-500'
   if (progress >= 80) return workspaceTheme === 'green' ? 'bg-amber-500' : 'bg-amber-500'
   return workspaceTheme === 'green' ? 'bg-sri-500' : 'bg-indo-500'

@@ -117,7 +117,7 @@ export function AddPocketModal({ open, onClose, onSave }: AddPocketModalProps) {
 }
 
 interface AddPocketFormProps {
-  currency: { code: 'LKR' | 'IDR'; symbol: string; name: string }
+  currency: { code: 'LKR' | 'IDR' | 'USD'; symbol: string; name: string }
   onSave: (pocket: Omit<MoneyPocket, 'id' | 'status'> & {
     icon: string
     currentAmount: number

@@ -2,10 +2,10 @@ export type Theme = 'light' | 'dark'
 
 export type WorkspaceId = 'srilanka' | 'indonesia'
 
-export type WorkspaceTheme = 'green' | 'blue'
+export type WorkspaceTheme = 'green' | 'blue' | 'purple'
 
 export interface Currency {
-  code: 'LKR' | 'IDR'
+  code: 'LKR' | 'IDR' | 'USD'
   symbol: string
   name: string
 }
@@ -38,6 +38,9 @@ export interface Bill {
   dueDate: string
   icon?: string
   provider?: string
+  status: 'unpaid' | 'paid'
+  recurring?: boolean
+  category?: string
 }
 
 export interface MoneyPocket {

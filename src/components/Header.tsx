@@ -4,6 +4,7 @@ import { useTheme } from '../app/providers/ThemeContext'
 import { useWorkspace } from '../app/providers/WorkspaceContext'
 import { useNotificationStore, initializeNotifications } from '../app/store/notifications'
 import { NotificationDropdown } from './Header/NotificationDropdown'
+import { ProfileMenu } from './Header/ProfileMenu'
 import { cn } from '../lib/utils'
 
 export function Header() {
@@ -73,6 +74,12 @@ export function Header() {
           >
             <User size={18} />
           </button>
+          {showProfile && (
+            <ProfileMenu
+              isOpen={showProfile}
+              onClose={() => setShowProfile(false)}
+            />
+          )}
         </div>
       </div>
     </header>

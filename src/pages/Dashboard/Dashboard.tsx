@@ -1,10 +1,13 @@
 import { motion, type Variants } from 'framer-motion'
-import { Bell, CalendarDays, Moon, Sun, User } from 'lucide-react'
+import { Bell, CalendarDays, Moon, Plus, Sun, User } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useTheme } from '../../app/providers/ThemeContext'
 import { useWorkspace } from '../../app/providers/WorkspaceContext'
+import { useDashboardStore } from '../../app/store'
 import { useNotificationStore } from '../../app/store/notifications'
 import { NotificationDropdown } from '../../components/Header/NotificationDropdown'
+import { ProfileMenu } from '../../components/Header/ProfileMenu'
+import { AddTransactionModal } from '../../components/AddTransactionModal'
 import { LowBalanceWarning } from './components/LowBalanceWarning'
 import { MoneyPockets } from './components/MoneyPockets'
 import { RecentTransactions } from './components/RecentTransactions'
@@ -69,6 +72,8 @@ export function Dashboard() {
   const [quoteIndex, setQuoteIndex] = useState(0)
   const [showNotifications, setShowNotifications] = useState(false)
   const [showProfile, setShowProfile] = useState(false)
+  const [showAddTransaction, setShowAddTransaction] = useState(false)
+  const { addTransaction, fetchTransactions, fetchAnalytics } = useDashboardStore()
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -132,7 +137,20 @@ export function Dashboard() {
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
+         <div className="flex items-center gap-2">
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => setShowAddTransaction(true)}
+            className={cn(
+              'flex items-center gap-2 rounded-xl bg-workspace px-4 py-2 text-sm font-medium text-white transition-all duration-300 hover:bg-workspace-hover'
+            )}
+          >
+            <Plus size={16} />
+            <span className="hidden sm:inline">+ Tambah Catatan</span>
+            <span className="sm:hidden">+</span>
+          </motion.button>
+
           <button
             type="button"
             aria-label="Toggle theme"
@@ -184,9 +202,15 @@ export function Dashboard() {
                 'flex h-9 w-9 items-center justify-center rounded-xl border border-border bg-gradient-to-br from-purple-500 to-indigo-600 text-white transition-all duration-200 hover:shadow-md'
               )}
             >
-              <User size={18} />
-            </button>
-          </div>
+               <User size={18} />
+             </button>
+             {showProfile && (
+               <ProfileMenu
+                 isOpen={showProfile}
+                 onClose={() => setShowProfile(false)}
+               />
+             )}
+           </div>
         </div>
       </motion.div>
 
@@ -217,6 +241,19 @@ export function Dashboard() {
       </motion.div>
 
       <DashboardFooter />
+
+      <AddTransactionModal
+        open={showAddTransaction}
+        onClose={() => setShowAddTransaction(false)}
+        onSave={async (transaction) => {
+          const result = await addTransaction(transaction)
+          if (result.success) {
+            setShowAddTransaction(false)
+            await fetchTransactions()
+            await fetchAnalytics()
+          }
+        }}
+      />
     </motion.div>
   )
 }

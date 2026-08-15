@@ -4,9 +4,35 @@ import { readFileSync } from 'fs'
 
 const packageJson = JSON.parse(readFileSync(new URL('./package.json', import.meta.url), 'utf-8'))
 
-export default defineConfig({
+function loadEnvSimple() {
+  try {
+    const content = readFileSync(new URL('./.env', import.meta.url), 'utf-8')
+    const env: Record<string, string> = {}
+    for (const line of content.split('\n')) {
+      const trimmed = line.trim()
+      if (trimmed && !trimmed.startsWith('#')) {
+        const idx = trimmed.indexOf('=')
+        if (idx > 0) {
+          const key = trimmed.substring(0, idx).trim()
+          const val = trimmed.substring(idx + 1).trim()
+          env[key] = val
+        }
+      }
+    }
+    return env
+  } catch {
+    return {}
+  }
+}
+
+export default defineConfig(() => {
+  const env = loadEnvSimple()
+  const serviceKey = env.SUPABASE_SERVICE_KEY || ''
+
+  return {
   define: {
     __APP_VERSION__: JSON.stringify(packageJson.version),
+    __SUPABASE_SERVICE_KEY__: JSON.stringify(serviceKey),
   },
   plugins: [
     VitePWA({
@@ -119,4 +145,5 @@ export default defineConfig({
       },
     }),
   ],
+  }
 })
