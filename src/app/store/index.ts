@@ -39,9 +39,11 @@ export interface DashboardState {
   fetchAccounts: () => Promise<void>
   fetchAnalytics: () => Promise<void>
   fetchBudgets: () => Promise<void>
-   addPocket: (pocket: Omit<MoneyPocket, 'id'>) => Promise<{ success: boolean; error?: string }>
+  addPocket: (pocket: Omit<MoneyPocket, 'id'>) => Promise<{ success: boolean; error?: string }>
   editPocket: (id: string, pocket: Partial<Omit<MoneyPocket, 'id'>>) => Promise<{ success: boolean; error?: string }>
   deletePocket: (id: string) => Promise<{ success: boolean; error?: string }>
+  addToPocket: (pocket: MoneyPocket, amount: number) => Promise<{ success: boolean; error?: string }>
+  withdrawFromPocket: (pocket: MoneyPocket, amount: number) => Promise<{ success: boolean; error?: string }>
   addBill: (bill: Omit<Bill, 'id'>) => Promise<{ success: boolean; error?: string }>
   editBill: (id: string, bill: Partial<Omit<Bill, 'id'>>) => Promise<{ success: boolean; error?: string }>
   deleteBill: (id: string) => Promise<{ success: boolean; error?: string }>
@@ -336,6 +338,258 @@ export const useDashboardStore = create<DashboardState>()(
           } catch (err) {
             console.error('Error deleting pocket:', err)
             return { success: false, error: 'Failed to delete pocket.' }
+          }
+        },
+
+        addToPocket: async (pocket, amount) => {
+          const workspace = get().currentWorkspace
+
+          if (amount <= 0) {
+            return { success: false, error: 'Amount must be greater than 0' }
+          }
+
+          if (!isSupabaseConfigured) {
+            const { balance } = get()
+            if (amount > balance.availableBalance) {
+              return { success: false, error: 'Saldo tersedia tidak mencukupi.' }
+            }
+            set((state) => ({
+              balance: { ...state.balance, availableBalance: state.balance.availableBalance - amount },
+              moneyPockets: state.moneyPockets.map((p) =>
+                p.id === pocket.id ? { ...p, currentAmount: p.currentAmount + amount } : p
+              ),
+            }))
+            return { success: true }
+          }
+
+          try {
+            let dbPocketId = pocket.id
+            let currentPocketAmount = pocket.currentAmount
+
+            if (pocket.id.startsWith('pocket-')) {
+              const { data: existing } = await supabase
+                .from('money_pockets')
+                .select('id, current_amount')
+                .eq('workspace', workspace)
+                .eq('name', pocket.name)
+                .single()
+
+              if (existing) {
+                dbPocketId = existing.id
+                currentPocketAmount = Number(existing.current_amount)
+              } else {
+                const { data: created, error: createError } = await supabase
+                  .from('money_pockets')
+                  .insert({
+                    workspace,
+                    name: pocket.name,
+                    icon: pocket.icon,
+                    current_amount: pocket.currentAmount,
+                    target_amount: pocket.targetAmount,
+                    status: pocket.status,
+                  })
+                  .select('id, current_amount')
+                  .single()
+
+                if (createError || !created) {
+                  return { success: false, error: 'Failed to create pocket record' }
+                }
+                dbPocketId = created.id
+                currentPocketAmount = Number(created.current_amount)
+              }
+            }
+
+            const { data: profileData, error: profileError } = await supabase
+              .from('profiles')
+              .select('available_balance')
+              .eq('workspace', workspace)
+              .single()
+
+            if (profileError || !profileData) {
+              return { success: false, error: 'Failed to fetch balance' }
+            }
+
+            const availableBalance = Number(profileData.available_balance)
+
+            if (amount > availableBalance) {
+              return { success: false, error: 'Saldo tersedia tidak mencukupi.' }
+            }
+
+            const { error: balanceError } = await supabase
+              .from('profiles')
+              .update({ available_balance: availableBalance - amount })
+              .eq('workspace', workspace)
+
+            if (balanceError) {
+              return { success: false, error: 'Failed to update balance' }
+            }
+
+            const { error: pocketError } = await supabase
+              .from('money_pockets')
+              .update({ current_amount: currentPocketAmount + amount })
+              .eq('id', dbPocketId)
+
+            if (pocketError) {
+              await supabase
+                .from('profiles')
+                .update({ available_balance: availableBalance })
+                .eq('workspace', workspace)
+              return { success: false, error: 'Failed to update pocket' }
+            }
+
+            set((state) => ({
+              balance: {
+                ...state.balance,
+                availableBalance: state.balance.availableBalance - amount,
+              },
+              moneyPockets: state.moneyPockets.map((p) =>
+                p.id === pocket.id || p.id === dbPocketId
+                  ? { ...p, id: dbPocketId, currentAmount: currentPocketAmount + amount }
+                  : p
+              ),
+            }))
+
+            await get().fetchAnalytics()
+            await get().fetchMoneyPockets()
+
+            return { success: true }
+          } catch (err) {
+            console.error('Error in addToPocket:', err)
+            return { success: false, error: 'Failed to transfer funds' }
+          }
+        },
+
+        withdrawFromPocket: async (pocket, amount) => {
+          const workspace = get().currentWorkspace
+
+          if (amount <= 0) {
+            return { success: false, error: 'Amount must be greater than 0' }
+          }
+
+          if (!isSupabaseConfigured) {
+            const { moneyPockets: localPockets } = get()
+            const targetPocket = localPockets.find((p) => p.id === pocket.id)
+            if (!targetPocket) {
+              return { success: false, error: 'Pocket not found' }
+            }
+            if (amount > targetPocket.currentAmount) {
+              return { success: false, error: 'Saldo Pocket tidak mencukupi.' }
+            }
+            set((state) => ({
+              balance: {
+                ...state.balance,
+                availableBalance: state.balance.availableBalance + amount,
+              },
+              moneyPockets: state.moneyPockets.map((p) =>
+                p.id === pocket.id ? { ...p, currentAmount: p.currentAmount - amount } : p
+              ),
+            }))
+            return { success: true }
+          }
+
+          try {
+            let dbPocketId = pocket.id
+
+            if (pocket.id.startsWith('pocket-')) {
+              const { data: existing } = await supabase
+                .from('money_pockets')
+                .select('id, current_amount')
+                .eq('workspace', workspace)
+                .eq('name', pocket.name)
+                .single()
+
+              if (existing) {
+                dbPocketId = existing.id
+              } else {
+                const { data: created, error: createError } = await supabase
+                  .from('money_pockets')
+                  .insert({
+                    workspace,
+                    name: pocket.name,
+                    icon: pocket.icon,
+                    current_amount: pocket.currentAmount,
+                    target_amount: pocket.targetAmount,
+                    status: pocket.status,
+                  })
+                  .select('id, current_amount')
+                  .single()
+
+                if (createError || !created) {
+                  return { success: false, error: 'Failed to create pocket record' }
+                }
+                dbPocketId = created.id
+              }
+            }
+
+            const { data: pocketData, error: pocketFetchError } = await supabase
+              .from('money_pockets')
+              .select('current_amount')
+              .eq('id', dbPocketId)
+              .single()
+
+            if (pocketFetchError || !pocketData) {
+              return { success: false, error: 'Failed to fetch pocket balance' }
+            }
+
+            const pocketBalance = Number(pocketData.current_amount)
+
+            if (amount > pocketBalance) {
+              return { success: false, error: 'Saldo Pocket tidak mencukupi.' }
+            }
+
+            const { data: profileData, error: profileError } = await supabase
+              .from('profiles')
+              .select('available_balance')
+              .eq('workspace', workspace)
+              .single()
+
+            if (profileError || !profileData) {
+              return { success: false, error: 'Failed to fetch balance' }
+            }
+
+            const availableBalance = Number(profileData.available_balance)
+
+            const { error: pocketUpdateError } = await supabase
+              .from('money_pockets')
+              .update({ current_amount: pocketBalance - amount })
+              .eq('id', dbPocketId)
+
+            if (pocketUpdateError) {
+              return { success: false, error: 'Failed to update pocket' }
+            }
+
+            const { error: balanceError } = await supabase
+              .from('profiles')
+              .update({ available_balance: availableBalance + amount })
+              .eq('workspace', workspace)
+
+            if (balanceError) {
+              await supabase
+                .from('money_pockets')
+                .update({ current_amount: pocketBalance })
+                .eq('id', dbPocketId)
+              return { success: false, error: 'Failed to update balance' }
+            }
+
+            set((state) => ({
+              balance: {
+                ...state.balance,
+                availableBalance: state.balance.availableBalance + amount,
+              },
+              moneyPockets: state.moneyPockets.map((p) =>
+                p.id === pocket.id || p.id === dbPocketId
+                  ? { ...p, id: dbPocketId, currentAmount: pocketBalance - amount }
+                  : p
+              ),
+            }))
+
+            await get().fetchAnalytics()
+            await get().fetchMoneyPockets()
+
+            return { success: true }
+          } catch (err) {
+            console.error('Error in withdrawFromPocket:', err)
+            return { success: false, error: 'Failed to transfer funds' }
           }
         },
 

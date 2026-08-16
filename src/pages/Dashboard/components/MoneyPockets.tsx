@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion'
-import { Pencil, Plus, Trash2, Wallet } from 'lucide-react'
+import { Pencil, Plus, Trash2, TrendingDown, TrendingUp, Wallet } from 'lucide-react'
 import { useState } from 'react'
 import { useWorkspace } from '../../../app/providers/WorkspaceContext'
 import { useDashboardStore } from '../../../app/store'
@@ -9,6 +9,7 @@ import type { MoneyPocket } from '../../../lib/types'
 import { AddPocketModal } from './AddPocketModal'
 import { EditPocketModal } from './EditPocketModal'
 import { DeleteConfirmation } from './DeleteConfirmation'
+import { PocketTransferModal } from './PocketTransferModal'
 
 const cardVariants = {
   hidden: { opacity: 0, y: 20 },
@@ -25,14 +26,17 @@ const DEFAULT_POCKETS = [
 export function MoneyPockets() {
   const { currentWorkspace } = useWorkspace()
   const { currency, theme } = currentWorkspace
-  const { moneyPockets = [], addPocket, editPocket, deletePocket, fetchMoneyPockets } =
+  const { moneyPockets = [], balance, addPocket, editPocket, deletePocket, fetchMoneyPockets, addToPocket, withdrawFromPocket } =
     useDashboardStore()
 
   const [showAddModal, setShowAddModal] = useState(false)
   const [showEditModal, setShowEditModal] = useState(false)
   const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const [showTransferModal, setShowTransferModal] = useState(false)
+  const [transferMode, setTransferMode] = useState<'isi' | 'tarik'>('isi')
   const [editingPocket, setEditingPocket] = useState<MoneyPocket | null>(null)
   const [deletingPocket, setDeletingPocket] = useState<MoneyPocket | null>(null)
+  const [transferPocket, setTransferPocket] = useState<MoneyPocket | null>(null)
   const [dismissedDefaults, setDismissedDefaults] = useState<Set<string>>(new Set())
 
   const pocketMap = new Map((moneyPockets || []).map((p) => [p.name, p]))
@@ -144,6 +148,37 @@ export function MoneyPockets() {
   const handleDeleteClick = (pocket: MoneyPocket) => {
     setDeletingPocket(pocket)
     setShowDeleteModal(true)
+  }
+
+  const handleIsiClick = (pocket: MoneyPocket) => {
+    setTransferPocket(pocket)
+    setTransferMode('isi')
+    setShowTransferModal(true)
+  }
+
+  const handleTarikClick = (pocket: MoneyPocket) => {
+    setTransferPocket(pocket)
+    setTransferMode('tarik')
+    setShowTransferModal(true)
+  }
+
+  const handleTransferConfirm = async (amount: number) => {
+    if (!transferPocket) return { success: false, error: 'No pocket selected' }
+
+    let result: { success: boolean; error?: string }
+    if (transferMode === 'isi') {
+      result = await addToPocket(transferPocket, amount)
+    } else {
+      result = await withdrawFromPocket(transferPocket, amount)
+    }
+
+    if (result.success) {
+      setShowTransferModal(false)
+      setTransferPocket(null)
+      await fetchMoneyPockets()
+    }
+
+    return result
   }
 
   const getProgress = (pocket: MoneyPocket) => {
@@ -269,33 +304,69 @@ export function MoneyPockets() {
                   </div>
                 </div>
 
-                <div className="mt-3 flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <motion.button
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.9 }}
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      handleEditClick(pocket)
-                    }}
-                    className={cn(
-                      'flex h-7 w-7 items-center justify-center rounded-lg text-text-tertiary transition-all hover:bg-secondary hover:text-text'
-                    )}
-                  >
-                    <Pencil size={14} />
-                  </motion.button>
-                  <motion.button
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.9 }}
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      handleDeleteClick(pocket)
-                    }}
-                    className={cn(
-                      'flex h-7 w-7 items-center justify-center rounded-lg text-text-tertiary transition-all hover:bg-error-500/10 hover:text-error-500'
-                    )}
-                  >
-                    <Trash2 size={14} />
-                  </motion.button>
+                <div className="mt-3 flex flex-col gap-2">
+                  <div className="flex items-center gap-2">
+                    <motion.button
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        handleIsiClick(pocket)
+                      }}
+                      title="Isi"
+                      className={cn(
+                        'flex flex-1 items-center justify-center gap-1 rounded-xl border border-transparent bg-gradient-to-r from-purple-500 to-indigo-600 px-3 py-1.5 text-xs font-medium text-white transition-all hover:from-purple-600 hover:to-indigo-700'
+                      )}
+                    >
+                      <TrendingDown size={12} />
+                      + Isi
+                    </motion.button>
+                    <motion.button
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        handleTarikClick(pocket)
+                      }}
+                      title="Tarik"
+                      className={cn(
+                        'flex flex-1 items-center justify-center gap-1 rounded-xl border border-border bg-secondary/50 px-3 py-1.5 text-xs font-medium text-text-secondary transition-all hover:bg-secondary'
+                      )}
+                    >
+                      <TrendingUp size={12} />
+                      Tarik
+                    </motion.button>
+                  </div>
+                  <div className="flex items-center justify-end gap-1">
+                    <motion.button
+                      whileHover={{ scale: 1.1 }}
+                      whileTap={{ scale: 0.9 }}
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        handleEditClick(pocket)
+                      }}
+                      title="Edit"
+                      className={cn(
+                        'flex h-7 w-7 items-center justify-center rounded-lg text-text-tertiary transition-all hover:bg-secondary hover:text-text'
+                      )}
+                    >
+                      <Pencil size={14} />
+                    </motion.button>
+                    <motion.button
+                      whileHover={{ scale: 1.1 }}
+                      whileTap={{ scale: 0.9 }}
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        handleDeleteClick(pocket)
+                      }}
+                      title="Hapus"
+                      className={cn(
+                        'flex h-7 w-7 items-center justify-center rounded-lg text-text-tertiary transition-all hover:bg-error-500/10 hover:text-error-500'
+                      )}
+                    >
+                      <Trash2 size={14} />
+                    </motion.button>
+                  </div>
                 </div>
               </motion.div>
             ))}
@@ -327,6 +398,18 @@ export function MoneyPockets() {
         }}
         pocket={deletingPocket}
         onConfirm={handleDeleteConfirm}
+      />
+
+      <PocketTransferModal
+        open={showTransferModal}
+        onClose={() => {
+          setShowTransferModal(false)
+          setTransferPocket(null)
+        }}
+        pocket={transferPocket}
+        availableBalance={balance.availableBalance}
+        mode={transferMode}
+        onConfirm={handleTransferConfirm}
       />
     </motion.div>
   )
