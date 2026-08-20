@@ -197,7 +197,7 @@ export function Transactions() {
       className="flex flex-col gap-6"
     >
       {/* Page Header */}
-      <motion.div variants={itemVariants} className="flex items-center justify-between gap-3">
+      <motion.div variants={itemVariants} className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-3">
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-workspace/10 text-workspace">
             <CreditCard size={16} />
@@ -212,11 +212,12 @@ export function Transactions() {
           whileTap={{ scale: 0.95 }}
           onClick={() => setShowAddTransaction(true)}
           className={cn(
-            'flex items-center gap-2 rounded-xl bg-workspace px-4 py-2 text-sm font-medium text-white transition-all duration-300 hover:bg-workspace-hover'
+            'w-full sm:w-auto flex items-center justify-center gap-1.5 rounded-xl bg-workspace px-3 py-2.5 text-sm font-medium text-white transition-all duration-300 hover:bg-workspace-hover sm:gap-2 sm:px-4 sm:py-2'
           )}
         >
           <Plus size={16} />
-          + Tambah Catatan
+          <span className="hidden sm:inline">+ Tambah Catatan</span>
+          <span className="sm:hidden">+</span>
         </motion.button>
       </motion.div>
 
@@ -310,7 +311,7 @@ export function Transactions() {
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className={cn(
-                    'w-full rounded-xl border border-border bg-secondary px-10 py-2 text-sm text-text placeholder-text-tertiary transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-workspace focus:ring-offset-2'
+                    'w-full rounded-xl border border-border bg-secondary px-10 py-2 text-sm text-text placeholder:text-text-tertiary transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-workspace focus:ring-offset-2'
                   )}
                 />
               </div>
@@ -377,7 +378,7 @@ export function Transactions() {
                   whileTap={{ scale: 0.95 }}
                   onClick={exportToCSV}
                   className={cn(
-                    'flex items-center gap-1.5 rounded-xl bg-workspace px-4 py-1.5 text-sm font-medium text-white transition-colors hover:bg-workspace-hover'
+                    'flex items-center gap-1.5 rounded-xl bg-workspace px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-workspace-hover sm:gap-2 sm:px-4 sm:py-2'
                   )}
                 >
                   <Download size={14} />
@@ -406,7 +407,7 @@ export function Transactions() {
                   setCurrentPage(1)
                 }}
                 className={cn(
-                  'cursor-pointer rounded-lg border border-border bg-secondary px-2 py-1 text-xs text-text transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-workspace'
+                  'cursor-pointer rounded-lg border border-border bg-secondary px-2.5 py-1.5 text-xs text-text transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-workspace'
                 )}
               >
                 {itemsPerPageOptions.map((size) => (
@@ -419,8 +420,8 @@ export function Transactions() {
           </CardHeader>
 
           <CardContent className="p-0">
-            <div className="overflow-x-auto">
-              <table className="w-full">
+              <div className="overflow-x-auto">
+               <table className="hidden w-full sm:table">
                 <thead>
                   <tr className="border-b border-border/50">
                     <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-text-tertiary">
@@ -512,9 +513,72 @@ export function Transactions() {
                   )}
                 </tbody>
               </table>
+
+              {/* Mobile Card List */}
+              <div className="space-y-3 sm:hidden">
+                {paginatedTransactions.length === 0 ? (
+                  <div className="py-8 text-center">
+                    <p className="text-sm text-text-secondary">
+                      No transactions found. Try adjusting your filters.
+                    </p>
+                  </div>
+                ) : (
+                  paginatedTransactions.map((tx, index) => {
+                    const categoryClass =
+                      categoryColors[tx.category] ||
+                      'bg-secondary text-text-secondary border border-border'
+                    const isIncome = tx.amount >= 0
+
+                    return (
+                      <motion.div
+                        key={tx.id}
+                        initial={{ opacity: 0, x: -10 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{
+                          duration: 0.3,
+                          delay: index * 0.03,
+                          ease: 'easeOut',
+                        }}
+                        className="flex items-center justify-between rounded-xl border border-border/50 bg-secondary/30 p-4"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-secondary text-lg">
+                            {tx.icon || getCategoryIcon(tx.category)}
+                          </div>
+                          <div>
+                            <span className="font-medium text-text">
+                              {tx.description}
+                            </span>
+                            <div className="mt-1 flex items-center gap-2">
+                              <Badge className={cn('border', categoryClass)}>
+                                {tx.category}
+                              </Badge>
+                            </div>
+                            <p className="mt-1 text-sm text-text-secondary">
+                              {formatDate(tx.date)}
+                            </p>
+                          </div>
+                        </div>
+                        <span
+                          className={cn(
+                            'text-lg font-semibold',
+                            isIncome ? 'text-workspace' : 'text-red-500'
+                          )}
+                        >
+                          {isIncome ? '+' : '-'}
+                          {formatCurrencyFull(
+                            Math.abs(tx.amount),
+                            currency.code
+                          )}
+                        </span>
+                      </motion.div>
+                    )
+                  })
+                )}
+              </div>
             </div>
 
-            <div className="flex items-center justify-between border-t border-border/50 px-6 py-4">
+              <div className="flex items-center justify-between border-t border-border/50 px-4 py-4 sm:px-6">
               <p className="text-sm text-text-secondary">
                 Showing {startIndex + 1}-{endIndex} of{' '}
                 {filteredTransactions.length} transactions
@@ -526,10 +590,10 @@ export function Transactions() {
                   onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                   disabled={currentPage === 1}
                   className={cn(
-                    'flex h-8 w-8 items-center justify-center rounded-lg border border-border bg-secondary text-text-secondary transition-all hover:bg-border disabled:cursor-not-allowed disabled:opacity-50'
+                    'flex h-9 w-9 items-center justify-center rounded-lg border border-border bg-secondary text-text-secondary transition-all hover:bg-border disabled:cursor-not-allowed disabled:opacity-50'
                   )}
                 >
-                  <ChevronLeft size={14} />
+                  <ChevronLeft size={16} />
                 </button>
 
                 <span className="flex items-center gap-1">
@@ -540,7 +604,7 @@ export function Transactions() {
                         type="button"
                         onClick={() => setCurrentPage(page)}
                         className={cn(
-                          'flex h-8 w-8 items-center justify-center rounded-lg text-sm font-medium transition-all',
+                          'flex h-9 w-9 items-center justify-center rounded-lg text-sm font-medium transition-all',
                           currentPage === page
                             ? 'bg-workspace text-white'
                             : 'text-text-secondary hover:bg-secondary'
@@ -559,10 +623,10 @@ export function Transactions() {
                   }
                   disabled={currentPage === totalPages}
                   className={cn(
-                    'flex h-8 w-8 items-center justify-center rounded-lg border border-border bg-secondary text-text-secondary transition-all hover:bg-border disabled:cursor-not-allowed disabled:opacity-50'
+                    'flex h-9 w-9 items-center justify-center rounded-lg border border-border bg-secondary text-text-secondary transition-all hover:bg-border disabled:cursor-not-allowed disabled:opacity-50'
                   )}
                 >
-                  <ChevronRight size={14} />
+                  <ChevronRight size={16} />
                 </button>
               </div>
             </div>

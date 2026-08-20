@@ -77,7 +77,7 @@ export function EditBillModal({ open, onClose, bill, categories, onSave }: EditB
         initial="hidden"
         animate="visible"
         exit="exit"
-        className="w-full max-w-lg"
+        className="w-full max-w-[95vw] sm:max-w-lg"
       >
         <Card
           glass
@@ -99,14 +99,14 @@ export function EditBillModal({ open, onClose, bill, categories, onSave }: EditB
           </div>
 
           <CardHeader className="border-b border-border/50 pb-4">
-            <div className="flex items-center justify-between px-6 pt-6">
+            <div className="flex items-center justify-between px-4 pt-4 sm:px-6 sm:pt-6">
               <h2 className="text-lg font-semibold text-text">Edit Bill</h2>
               <motion.button
                 whileHover={{ scale: 1.1, rotate: 90 }}
                 whileTap={{ scale: 0.9 }}
                 onClick={onClose}
                 className={cn(
-                  'flex h-7 w-7 items-center justify-center rounded-lg text-text-tertiary transition-all hover:bg-secondary hover:text-text'
+                  'flex h-9 w-9 items-center justify-center rounded-lg text-text-tertiary transition-all hover:bg-secondary hover:text-text'
                 )}
               >
                 <X size={16} />
@@ -114,7 +114,7 @@ export function EditBillModal({ open, onClose, bill, categories, onSave }: EditB
             </div>
           </CardHeader>
 
-          <CardContent className="p-6">
+          <CardContent className="p-4 sm:p-6">
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-text-secondary mb-1">
@@ -247,3 +247,4 @@ export function EditBillModal({ open, onClose, bill, categories, onSave }: EditB
     </motion.div>
   )
 }
+

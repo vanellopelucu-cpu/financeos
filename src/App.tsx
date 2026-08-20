@@ -11,6 +11,7 @@ import { Analytics } from './pages/Analytics'
 import { Accounts } from './pages/Accounts'
 import { Settings } from './pages/Settings'
 import { Notifications } from './pages/Notifications'
+import { DebtsAndCredits } from './pages/DebtsAndCredits'
 import { Bills } from './pages/Bills'
 import { Login } from './pages/auth/Login'
 import { Signup } from './pages/auth/Signup'
@@ -40,6 +41,7 @@ export function App() {
                 <Route path="/settings" element={<Settings />} />
                 <Route path="/notifications" element={<Notifications />} />
                 <Route path="/bills" element={<Bills />} />
+                <Route path="/debts-credits" element={<DebtsAndCredits />} />
               </Route>
             </Routes>
             <PWAToast />

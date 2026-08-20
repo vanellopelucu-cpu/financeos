@@ -1,14 +1,18 @@
 import { motion } from 'framer-motion'
-import { ChevronRight, Plus, Trash2 } from 'lucide-react'
+import { ChevronRight, Plus, Trash2, Check, RotateCw } from 'lucide-react'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useWorkspace } from '../../../app/providers/WorkspaceContext'
 import { useDashboardStore } from '../../../app/store'
+import { useNotificationStore } from '../../../app/store/notifications'
 import { Card, CardContent, CardHeader, CardTitle } from '../../../components/ui/Card'
+import { Badge } from '../../../components/ui/Badge'
 import { cn, formatCurrencyFull, getDueDateLabel } from '../../../lib/utils'
 import type { Bill } from '../../../lib/types'
 import { AddBillModal } from './AddBillModal'
 import { DeleteBillConfirmation } from './DeleteBillConfirmation'
+import { BillPayConfirm } from './BillPayConfirm'
+import { BillUnpayConfirm } from './BillUnpayConfirm'
 
 const BILL_CATEGORIES = [
   'Bills & Utilities',
@@ -25,18 +29,29 @@ const itemVariants = {
   visible: { opacity: 1, x: 0 },
 }
 
+const statusColors: Record<string, string> = {
+  unpaid: 'bg-warning-500/10 text-warning-500 border-warning-500/30',
+  paid: 'bg-success-500/10 text-success-500 border-success-500/30',
+  overdue: 'bg-red-500/10 text-red-500 border-red-500/30',
+}
+
 export function UpcomingBillsReminder() {
   const { currentWorkspace } = useWorkspace()
   const { currency } = currentWorkspace
-  const { upcomingBills, addBill, deleteBill, fetchBills } = useDashboardStore()
+   const { upcomingBills, addBill, deleteBill, payBill, unpayBill, fetchBills } = useDashboardStore()
   const [showAddModal, setShowAddModal] = useState(false)
   const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const [showPayModal, setShowPayModal] = useState(false)
+  const [showUnpayModal, setShowUnpayModal] = useState(false)
   const [deletingBill, setDeletingBill] = useState<Bill | null>(null)
+  const [payingBill, setPayingBill] = useState<Bill | null>(null)
+  const [unpayingBill, setUnpayingBill] = useState<Bill | null>(null)
 
-   const sortedBills = [...upcomingBills].sort(
+  const navigate = useNavigate()
+
+  const sortedBills = [...upcomingBills].sort(
     (a, b) => new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime()
   )
-  const navigate = useNavigate()
 
   const handleAddSave = async (bill: Omit<Bill, 'id' | 'status'> & {
     recurring: boolean
@@ -62,6 +77,52 @@ export function UpcomingBillsReminder() {
     }
   }
 
+  const handlePayConfirm = async (paidDate: string) => {
+    if (!payingBill) return
+    const result = await payBill(payingBill, paidDate)
+    if (result.success) {
+      setShowPayModal(false)
+      setPayingBill(null)
+    } else {
+      useNotificationStore.getState().addNotification({
+        type: 'bill',
+        title: 'Gagal Membayar Tagihan',
+        description: result.error || 'Gagal membayar tagihan. Silakan coba lagi.',
+        priority: 'high',
+        read: false,
+        icon: '💡',
+        timestamp: new Date().toISOString(),
+      })
+    }
+  }
+
+  const handleUnpayConfirm = async () => {
+    if (!unpayingBill) return
+    const result = await unpayBill(unpayingBill)
+    if (result.success) {
+      setShowUnpayModal(false)
+      setUnpayingBill(null)
+    } else {
+      useNotificationStore.getState().addNotification({
+        type: 'bill',
+        title: 'Gagal Membatalkan Pembayaran',
+        description: result.error || 'Gagal membatalkan pembayaran. Silakan coba lagi.',
+        priority: 'high',
+        read: false,
+        icon: '💡',
+        timestamp: new Date().toISOString(),
+      })
+    }
+  }
+
+  const formatPaidDate = (dateStr: string) => {
+    const date = new Date(dateStr)
+    return date.toLocaleDateString('en-US', {
+      month: 'long',
+      day: 'numeric',
+    })
+  }
+
   return (
     <>
       <motion.div
@@ -85,7 +146,7 @@ export function UpcomingBillsReminder() {
               whileTap={{ scale: 0.9 }}
               onClick={() => setShowAddModal(true)}
               className={cn(
-                'flex h-8 w-8 items-center justify-center rounded-lg bg-workspace/10 text-workspace transition-colors hover:bg-workspace/20'
+                'flex h-9 w-9 items-center justify-center rounded-lg bg-workspace/10 text-workspace transition-colors hover:bg-workspace/20'
               )}
               aria-label="Add bill"
             >
@@ -115,50 +176,114 @@ export function UpcomingBillsReminder() {
                 </p>
               </div>
             ) : (
-              sortedBills.map((bill) => (
-                <motion.div
-                  key={bill.id}
-                  variants={itemVariants}
-                  whileHover={{ backgroundColor: 'hsl(var(--color-bg-secondary) / 0.5)' }}
-                  className={cn(
-                    'group flex items-center justify-between border-b border-border/30 p-4 transition-all last:border-0'
-                  )}
-                >
-                  <div className="flex items-center gap-4">
-                    <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-secondary text-2xl shadow-soft">
-                      {bill.icon || '📄'}
+              sortedBills.map((bill) => {
+                const isPaid = bill.status === 'paid'
+                const isOverdue = bill.status === 'overdue'
+
+                return (
+                  <motion.div
+                    key={bill.id}
+                    variants={itemVariants}
+                    className={cn(
+                      'group flex items-center justify-between border-b border-border/30 p-4 transition-all last:border-0',
+                      isPaid ? 'opacity-75' : ''
+                    )}
+                  >
+                       <div className="flex items-center gap-3">
+                      <div className={cn(
+                        'flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl text-2xl shadow-soft',
+                        isPaid ? 'bg-success-500/10' : isOverdue ? 'bg-red-500/10' : 'bg-secondary'
+                      )}>
+                        {bill.icon || '📄'}
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <p className="font-semibold text-text">{bill.title}</p>
+                          {isPaid && (
+                            <Badge
+                              className={cn('border', statusColors.paid)}
+                            >
+                              <span className="flex items-center gap-1">
+                                <span className="h-1.5 w-1.5 rounded-full bg-success-500"></span>
+                                LUNAS
+                              </span>
+                            </Badge>
+                          )}
+                          {isOverdue && !isPaid && (
+                            <Badge
+                              className={cn('border', statusColors.overdue)}
+                            >
+                              TERLENDIR
+                            </Badge>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-2 text-sm text-text-secondary">
+                          <span>{getDueDateLabel(bill.dueDate)}</span>
+                          {isPaid && bill.paidDate && (
+                            <>
+                              <span>·</span>
+                              <span>Dibayar: {formatPaidDate(bill.paidDate)}</span>
+                            </>
+                          )}
+                        </div>
+                      </div>
                     </div>
-                    <div>
-                      <p className="font-semibold text-text">{bill.title}</p>
-                      <p className="text-sm text-text-secondary">
-                        {getDueDateLabel(bill.dueDate)}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <span className="text-right font-semibold text-text">
-                      {formatCurrencyFull(bill.amount, currency.code)}
-                    </span>
-                    <ChevronRight
-                      size={16}
-                      className="text-text-tertiary transition-transform group-hover:translate-x-1"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setDeletingBill(bill)
-                        setShowDeleteModal(true)
-                      }}
-                      className={cn(
-                        'opacity-0 group-hover:opacity-100 rounded-lg p-1 text-text-tertiary transition-all hover:bg-error-500/10 hover:text-error-500'
+                      <div className="flex items-center gap-2">
+                      <span className="text-right font-semibold text-text">
+                        {formatCurrencyFull(bill.amount, currency.code)}
+                      </span>
+
+                      {!isPaid && (
+                        <motion.button
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                          onClick={() => {
+                            setPayingBill(bill)
+                            setShowPayModal(true)
+                          }}
+                          className={cn(
+                            'flex h-9 w-9 items-center justify-center rounded-lg bg-success-500/10 text-success-500 transition-colors hover:bg-success-500/20'
+                          )}
+                          aria-label={`Mark ${bill.title} as paid`}
+                        >
+                          <Check size={16} />
+                        </motion.button>
                       )}
-                      aria-label={`Delete ${bill.title}`}
-                    >
-                      <Trash2 size={14} />
-                    </button>
-                  </div>
-                </motion.div>
-              ))
+
+                      {isPaid && (
+                        <motion.button
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                          onClick={() => {
+                            setUnpayingBill(bill)
+                            setShowUnpayModal(true)
+                          }}
+                          className={cn(
+                            'flex h-9 w-9 items-center justify-center rounded-lg bg-warning-500/10 text-warning-500 transition-colors hover:bg-warning-500/20'
+                          )}
+                          aria-label={`Mark ${bill.title} as unpaid`}
+                        >
+                          <RotateCw size={16} />
+                        </motion.button>
+                      )}
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setDeletingBill(bill)
+                          setShowDeleteModal(true)
+                        }}
+                        className={cn(
+                          'flex h-9 w-9 items-center justify-center rounded-lg text-text-tertiary transition-all hover:bg-error-500/10 hover:text-error-500'
+                        )}
+                        aria-label={`Delete ${bill.title}`}
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
+                  </motion.div>
+                )
+              })
             )}
           </motion.div>
 
@@ -193,6 +318,29 @@ export function UpcomingBillsReminder() {
       bill={deletingBill}
       onConfirm={handleDeleteConfirm}
     />
+
+    <BillPayConfirm
+      open={showPayModal}
+      onClose={() => {
+        setShowPayModal(false)
+        setPayingBill(null)
+      }}
+      bill={payingBill}
+      currency={currency.code}
+      onConfirm={handlePayConfirm}
+    />
+
+    <BillUnpayConfirm
+      open={showUnpayModal}
+      onClose={() => {
+        setShowUnpayModal(false)
+        setUnpayingBill(null)
+      }}
+      bill={unpayingBill}
+      currency={currency.code}
+      onConfirm={handleUnpayConfirm}
+    />
     </>
   )
 }
+

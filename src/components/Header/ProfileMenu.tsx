@@ -62,10 +62,10 @@ export function ProfileMenu({ isOpen, onClose }: ProfileMenuProps) {
         initial="hidden"
         animate="visible"
         exit="exit"
-        className="absolute top-12 right-0 z-50 w-48 rounded-xl border border-border bg-surface shadow-lg"
+        className="absolute top-12 right-0 z-50 w-48 max-w-[calc(100vw-1rem)] rounded-xl border border-border bg-surface shadow-lg"
       >
         <div className="p-2">
-          <div className="border-b border-border/50 px-3 py-2">
+          <div className="border-b border-border/50 px-3 py-2.5">
             <p className="text-xs text-text-tertiary">Signed in as</p>
             <p className="text-sm font-medium text-text truncate">
               {user?.email || 'user@example.com'}
@@ -76,7 +76,7 @@ export function ProfileMenu({ isOpen, onClose }: ProfileMenuProps) {
             whileHover={{ backgroundColor: 'hsl(var(--color-bg-secondary) / 0.5)' }}
             onClick={() => handleNavigate('/settings')}
             className={cn(
-              'flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left text-sm text-text-secondary hover:text-text'
+              'flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm text-text-secondary hover:text-text'
             )}
           >
             <User size={16} />
@@ -87,7 +87,7 @@ export function ProfileMenu({ isOpen, onClose }: ProfileMenuProps) {
             whileHover={{ backgroundColor: 'hsl(var(--color-bg-secondary) / 0.5)' }}
             onClick={() => handleNavigate('/settings')}
             className={cn(
-              'flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left text-sm text-text-secondary hover:text-text'
+              'flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm text-text-secondary hover:text-text'
             )}
           >
             <Settings size={16} />
@@ -98,7 +98,7 @@ export function ProfileMenu({ isOpen, onClose }: ProfileMenuProps) {
             whileHover={{ backgroundColor: 'hsl(var(--color-bg-secondary) / 0.5)' }}
             onClick={() => handleNavigate('/settings')}
             className={cn(
-              'flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left text-sm text-text-secondary hover:text-text'
+              'flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm text-text-secondary hover:text-text'
             )}
           >
             <Mail size={16} />
@@ -109,7 +109,7 @@ export function ProfileMenu({ isOpen, onClose }: ProfileMenuProps) {
             whileHover={{ backgroundColor: 'hsl(var(--color-bg-secondary) / 0.5)' }}
             onClick={() => handleNavigate('/settings')}
             className={cn(
-              'flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left text-sm text-text-secondary hover:text-text'
+              'flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm text-text-secondary hover:text-text'
             )}
           >
             <User size={16} />
@@ -122,7 +122,7 @@ export function ProfileMenu({ isOpen, onClose }: ProfileMenuProps) {
             whileHover={{ backgroundColor: 'hsl(var(--error-500) / 0.1)' }}
             onClick={handleLogout}
             className={cn(
-              'flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left text-sm text-error-500 hover:text-error-600'
+              'flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm text-error-500 hover:text-error-600'
             )}
           >
             <LogOut size={16} />

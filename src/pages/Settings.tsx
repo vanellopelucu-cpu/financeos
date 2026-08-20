@@ -563,16 +563,16 @@ function Notifications() {
                     whileTap={{ scale: 0.95 }}
                     onClick={() => toggleNotification(item.key as keyof typeof notifications)}
                     className={cn(
-                      'relative h-6 w-12 rounded-full transition-colors',
+                      'relative flex h-8 w-14 min-h-[44px] min-w-[44px] cursor-pointer items-center rounded-full transition-colors',
                       isEnabled ? 'bg-workspace' : 'bg-border'
                     )}
                   >
                     <motion.div
                       className={cn(
-                        'absolute top-0.5 h-5 w-5 rounded-full bg-white shadow-md transition-transform'
+                        'absolute top-1.5 h-5 w-5 rounded-full bg-white shadow-md transition-transform'
                       )}
                       animate={{
-                        x: isEnabled ? 26 : 2,
+                        x: isEnabled ? 28 : 4,
                       }}
                       transition={{ type: 'spring', stiffness: 300, damping: 20 }}
                     />
@@ -824,8 +824,8 @@ function DataPrivacy() {
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.98 }}
                         onClick={() => setShowDeleteConfirm(false)}
-                        className={cn(
-                          'rounded-lg border border-border bg-secondary px-3 py-1.5 text-sm font-medium text-text-secondary transition-all hover:bg-border'
+                     className={cn(
+                          'rounded-lg border border-border bg-secondary px-3 py-2 text-sm font-medium text-text-secondary transition-all hover:bg-border'
                         )}
                       >
                         Cancel
@@ -833,8 +833,8 @@ function DataPrivacy() {
                       <motion.button
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.98 }}
-                        className={cn(
-                          'rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-1.5 text-sm font-medium text-red-500 transition-all hover:bg-red-500/20'
+                     className={cn(
+                          'rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm font-medium text-red-500 transition-all hover:bg-red-500/20'
                         )}
                       >
                         Confirm Delete
@@ -1018,3 +1018,4 @@ export function Settings() {
     </motion.div>
   )
 }
+

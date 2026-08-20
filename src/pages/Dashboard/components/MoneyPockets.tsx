@@ -215,7 +215,7 @@ export function MoneyPockets() {
               whileTap={{ scale: 0.98 }}
               onClick={() => setShowAddModal(true)}
               className={cn(
-                'flex items-center gap-2 rounded-xl border border-transparent bg-gradient-to-r from-purple-500 to-indigo-600 px-4 py-2 text-sm font-medium text-white transition-all hover:from-purple-600 hover:to-indigo-700'
+                'w-full sm:w-auto flex items-center justify-center gap-1.5 rounded-xl border border-transparent bg-gradient-to-r from-purple-500 to-indigo-600 px-4 py-2.5 text-sm font-medium text-white transition-all hover:from-purple-600 hover:to-indigo-700 sm:gap-2 sm:px-4 sm:py-2'
               )}
             >
               <Plus size={16} />
@@ -315,10 +315,10 @@ export function MoneyPockets() {
                       }}
                       title="Isi"
                       className={cn(
-                        'flex flex-1 items-center justify-center gap-1 rounded-xl border border-transparent bg-gradient-to-r from-purple-500 to-indigo-600 px-3 py-1.5 text-xs font-medium text-white transition-all hover:from-purple-600 hover:to-indigo-700'
+                        'flex flex-1 items-center justify-center gap-1 rounded-xl border border-transparent bg-gradient-to-r from-purple-500 to-indigo-600 px-3 py-2.5 text-xs font-medium text-white transition-all hover:from-purple-600 hover:to-indigo-700 sm:py-1.5'
                       )}
                     >
-                      <TrendingDown size={12} />
+                      <TrendingDown size={14} />
                       + Isi
                     </motion.button>
                     <motion.button
@@ -330,7 +330,7 @@ export function MoneyPockets() {
                       }}
                       title="Tarik"
                       className={cn(
-                        'flex flex-1 items-center justify-center gap-1 rounded-xl border border-border bg-secondary/50 px-3 py-1.5 text-xs font-medium text-text-secondary transition-all hover:bg-secondary'
+                        'flex flex-1 items-center justify-center gap-1 rounded-xl border border-border bg-secondary/50 px-3 py-2.5 text-xs font-medium text-text-secondary transition-all hover:bg-secondary sm:py-1.5'
                       )}
                     >
                       <TrendingUp size={12} />
@@ -347,10 +347,10 @@ export function MoneyPockets() {
                       }}
                       title="Edit"
                       className={cn(
-                        'flex h-7 w-7 items-center justify-center rounded-lg text-text-tertiary transition-all hover:bg-secondary hover:text-text'
+                        'flex h-9 w-9 items-center justify-center rounded-lg text-text-tertiary transition-all hover:bg-secondary hover:text-text'
                       )}
                     >
-                      <Pencil size={14} />
+                      <Pencil size={16} />
                     </motion.button>
                     <motion.button
                       whileHover={{ scale: 1.1 }}
@@ -361,10 +361,10 @@ export function MoneyPockets() {
                       }}
                       title="Hapus"
                       className={cn(
-                        'flex h-7 w-7 items-center justify-center rounded-lg text-text-tertiary transition-all hover:bg-error-500/10 hover:text-error-500'
+                        'flex h-9 w-9 items-center justify-center rounded-lg text-text-tertiary transition-all hover:bg-error-500/10 hover:text-error-500'
                       )}
                     >
-                      <Trash2 size={14} />
+                      <Trash2 size={16} />
                     </motion.button>
                   </div>
                 </div>
@@ -414,3 +414,4 @@ export function MoneyPockets() {
     </motion.div>
   )
 }
+

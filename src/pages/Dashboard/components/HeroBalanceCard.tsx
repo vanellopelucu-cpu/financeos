@@ -98,7 +98,7 @@ export function HeroBalanceCard() {
             </motion.p>
         </CardHeader>
 
-        <CardContent className="relative grid grid-cols-3 gap-4 p-6">
+        <CardContent className="relative grid grid-cols-1 gap-3 p-4 sm:grid-cols-3 sm:gap-4 sm:p-6">
           <motion.div
             variants={fadeInUp}
             className="flex flex-col items-center gap-2 rounded-xl border border-border/50 bg-secondary/50 p-4"
@@ -153,3 +153,4 @@ export function HeroBalanceCard() {
     </motion.div>
   )
 }
+

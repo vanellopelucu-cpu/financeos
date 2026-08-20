@@ -173,7 +173,7 @@ export function NotificationDropdown({
                 variants={itemVariants}
                 transition={{ duration: 0.2, ease: 'easeOut' }}
                 className={cn(
-                  'relative flex items-start gap-3 p-4 transition-all hover:bg-primary-200/30',
+                  'relative flex items-start gap-3 p-4 transition-all hover:bg-primary-200/30 dark:hover:bg-secondary/50',
                   !notification.read && 'bg-primary-300/10'
                 )}
               >
@@ -237,12 +237,12 @@ export function NotificationDropdown({
                     whileHover={{ scale: 1.1 }}
                     whileTap={{ scale: 0.9 }}
                     onClick={() => handleMarkAsRead(notification.id)}
-                    className={cn(
-                      'absolute right-2 top-2 rounded-lg p-1 text-text-tertiary transition-all hover:bg-border hover:text-text'
+                     className={cn(
+                      'absolute right-2 top-2 rounded-lg p-1.5 text-text-tertiary transition-all hover:bg-border hover:text-text'
                     )}
                     title="Mark as read"
                   >
-                    <Check size={12} />
+                    <Check size={14} />
                   </motion.button>
                 )}
               </motion.div>
@@ -258,22 +258,22 @@ export function NotificationDropdown({
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={handleMarkAllAsRead}
-              className={cn(
-                'flex items-center justify-center gap-1 rounded-2xl px-3 py-1.5 text-xs font-medium text-text-secondary transition-all hover:bg-primary-200/50 hover:text-primary-600'
-              )}
-            >
-              <Check size={12} />
-              Mark all as read
+                 className={cn(
+                  'flex items-center justify-center gap-1 rounded-2xl px-3 py-2 text-xs font-medium text-text-secondary transition-all hover:bg-primary-200/50 hover:text-primary-600 dark:hover:bg-secondary/50 dark:hover:text-text-secondary sm:py-1.5'
+                )}
+              >
+                <Check size={12} />
+                Mark all as read
             </motion.button>
             <motion.button
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={handleViewAll}
-              className={cn(
-                'flex items-center justify-center gap-1 rounded-2xl px-3 py-1.5 text-xs font-medium text-primary-600 transition-all hover:text-primary-700'
-              )}
-            >
-              View all
+                 className={cn(
+                  'flex items-center justify-center gap-1 rounded-2xl px-3 py-2 text-xs font-medium text-primary-600 transition-all hover:text-primary-700 dark:text-text-secondary dark:hover:text-text sm:py-1.5'
+                )}
+              >
+                View all
             </motion.button>
           </div>
         </div>

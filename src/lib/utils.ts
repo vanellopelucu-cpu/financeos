@@ -83,7 +83,7 @@ export function getDueDateColor(dueDate: string): string {
   if (diff === 0) return 'text-rose-500'
   if (diff <= 3) return 'text-amber-500'
   if (diff <= 7) return 'text-amber-400'
-  return 'text-slate-400'
+  return 'text-text-tertiary'
 }
 
 export function getProgressColor(progress: number): string {

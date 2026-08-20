@@ -80,7 +80,7 @@ export function RecentTransactions() {
 
         <CardContent className="p-0">
           <div className="overflow-x-auto">
-            <table className="w-full">
+            <table className="hidden w-full sm:table">
               <thead>
                 <tr className="border-b border-border/50">
                   <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-text-tertiary">
@@ -155,6 +155,55 @@ export function RecentTransactions() {
                 )}
               </tbody>
             </table>
+
+            {/* Mobile Card List */}
+            <div className="space-y-3 sm:hidden">
+              {recentTransactions.length === 0 ? (
+                <div className="py-8 text-center">
+                  <p className="text-sm text-text-secondary">No transactions found</p>
+                </div>
+              ) : (
+                recentTransactions.map((tx, index) => (
+                  <motion.div
+                    key={tx.id}
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{
+                      duration: 0.3,
+                      delay: index * 0.03,
+                      ease: 'easeOut',
+                    }}
+                    className="flex items-center justify-between rounded-xl border border-border/50 bg-secondary/30 p-4"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-secondary text-lg">
+                        {tx.icon || getCategoryIcon(tx.category)}
+                      </div>
+                      <div>
+                        <span className="font-medium text-text block">
+                          {tx.description}
+                        </span>
+                        <span className="text-sm text-text-secondary block">
+                          {tx.category}
+                        </span>
+                        <p className="text-xs text-text-tertiary mt-1">
+                          {formatDate(tx.date)}
+                        </p>
+                      </div>
+                    </div>
+                    <span
+                      className={cn(
+                        'text-lg font-semibold',
+                        tx.amount >= 0 ? 'text-workspace' : 'text-red-500'
+                      )}
+                    >
+                      {tx.amount >= 0 ? '+' : '-'}
+                      {formatCurrencyFull(Math.abs(tx.amount), currency.code)}
+                    </span>
+                  </motion.div>
+                ))
+              )}
+            </div>
           </div>
 
           {hasMore && (
@@ -162,7 +211,7 @@ export function RecentTransactions() {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3, delay: 0.2, ease: 'easeOut' }}
-              className="border-t border-border/50 px-6 py-4"
+              className="border-t border-border/50 px-4 py-4 sm:px-6"
             >
               <button
                 type="button"
@@ -180,3 +229,4 @@ export function RecentTransactions() {
     </motion.div>
   )
 }
+

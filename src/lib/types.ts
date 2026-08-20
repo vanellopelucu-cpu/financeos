@@ -29,6 +29,56 @@ export interface Transaction {
   amount: number
   icon?: string
   createdAt?: string
+  billId?: string
+}
+
+export type DebtStatus = 'unpaid' | 'partial' | 'paid'
+export type CreditStatus = 'unreceived' | 'partial' | 'received'
+
+export interface DebtPayment {
+  id: string
+  debtId: string
+  amount: number
+  paymentDate: string
+  note?: string
+  createdAt?: string
+}
+
+export interface CreditReceipt {
+  id: string
+  creditId: string
+  amount: number
+  receiptDate: string
+  note?: string
+  createdAt?: string
+}
+
+export interface Debt {
+  id: string
+  creditorName: string
+  amount: number
+  remainingAmount: number
+  status: DebtStatus
+  dueDate: string
+  note?: string
+  icon?: string
+  payments: DebtPayment[]
+  createdAt?: string
+  updatedAt?: string
+}
+
+export interface Credit {
+  id: string
+  debtorName: string
+  amount: number
+  remainingAmount: number
+  status: CreditStatus
+  dueDate: string
+  note?: string
+  icon?: string
+  receipts: CreditReceipt[]
+  createdAt?: string
+  updatedAt?: string
 }
 
 export interface Bill {
@@ -38,9 +88,11 @@ export interface Bill {
   dueDate: string
   icon?: string
   provider?: string
-  status: 'unpaid' | 'paid'
+  status: 'unpaid' | 'paid' | 'overdue'
   recurring?: boolean
   category?: string
+  paidDate?: string
+  paymentTransactionId?: string
 }
 
 export interface MoneyPocket {
@@ -108,4 +160,8 @@ export interface DashboardData {
   accounts: Record<string, Account[]>
   analytics: Record<string, AnalyticsData>
   budgets: Record<string, BudgetCategory[]>
+  debts: Record<string, Debt[]>
+  credits: Record<string, Credit[]>
+  debtPayments: Record<string, DebtPayment[]>
+  creditReceipts: Record<string, CreditReceipt[]>
 }

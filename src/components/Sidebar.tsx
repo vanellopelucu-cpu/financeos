@@ -7,6 +7,7 @@ import {
   PieChart,
   Settings,
   Wallet,
+  Landmark,
 } from 'lucide-react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../app/providers/AuthContext'
@@ -28,6 +29,7 @@ const navItems: NavItem[] = [
   { label: 'Accounts', href: '/accounts', icon: <Wallet size={20} /> },
   { label: 'Notifications', href: '/notifications', icon: <Bell size={20} /> },
   { label: 'Bills', href: '/bills', icon: <CreditCard size={20} /> },
+  { label: 'Hutang & Piutang', href: '/debts-credits', icon: <Landmark size={20} /> },
 ]
 
 export function Sidebar() {
@@ -61,16 +63,16 @@ export function Sidebar() {
               className={cn(
                 'group flex items-center gap-3 rounded-2xl px-3 py-2.5 text-sm font-medium transition-all duration-300',
                 isActive
-                  ? 'bg-gradient-to-r from-primary-200/30 to-secondary-200/30 text-primary-700 border-l-2 border-primary-500'
-                  : 'text-text-secondary hover:bg-primary-200/30 hover:text-primary-700'
+                  ? 'bg-gradient-to-r from-primary-200/30 to-secondary-200/30 text-primary-700 border-l-2 border-primary-500 dark:from-workspace/20 dark:to-transparent dark:text-text dark:border-workspace'
+                  : 'text-text-secondary hover:bg-primary-200/30 hover:text-primary-700 dark:hover:bg-secondary/50 dark:hover:text-text'
               )}
             >
               <span
                 className={cn(
                   'flex h-5 w-5 items-center justify-center transition-colors',
                   isActive
-                    ? 'text-primary-600'
-                    : 'text-text-tertiary group-hover:text-primary-600'
+                    ? 'text-primary-600 dark:text-workspace'
+                    : 'text-text-tertiary group-hover:text-primary-600 dark:text-text-tertiary dark:group-hover:text-text-secondary'
                 )}
               >
                 {item.icon}
@@ -86,7 +88,7 @@ export function Sidebar() {
         <Link
           to="/settings"
           className={cn(
-            'mt-2 flex w-full items-center gap-3 rounded-2xl px-3 py-2.5 text-sm font-medium text-text-secondary transition-all duration-300 hover:bg-primary-200/30 hover:text-primary-700'
+            'mt-2 flex w-full items-center gap-3 rounded-2xl px-3 py-2.5 text-sm font-medium text-text-secondary transition-all duration-300 hover:bg-primary-200/30 hover:text-primary-700 dark:hover:bg-secondary/50 dark:hover:text-text'
           )}
         >
           <Settings size={20} />

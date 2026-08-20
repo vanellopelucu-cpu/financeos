@@ -26,7 +26,7 @@ export function Header() {
           aria-label="Toggle theme"
           onClick={toggleTheme}
           className={cn(
-            'flex h-9 w-9 items-center justify-center rounded-2xl border border-border bg-secondary text-text-secondary transition-all duration-300 hover:bg-primary-200/50 hover:text-primary-600'
+              'flex h-9 w-9 items-center justify-center rounded-2xl border border-border bg-secondary text-text-secondary transition-all duration-300 hover:bg-primary-200/50 hover:text-primary-600 dark:hover:bg-secondary/50 dark:hover:text-text-secondary'
           )}
         >
           {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
@@ -38,7 +38,7 @@ export function Header() {
             aria-label="Notifications"
             onClick={() => setShowNotifications(!showNotifications)}
             className={cn(
-              'relative flex h-9 w-9 items-center justify-center rounded-2xl border border-border bg-secondary text-text-secondary transition-all duration-300 hover:bg-primary-200/50 hover:text-primary-600'
+              'relative flex h-9 w-9 items-center justify-center rounded-2xl border border-border bg-secondary text-text-secondary transition-all duration-300 hover:bg-primary-200/50 hover:text-primary-600 dark:hover:bg-secondary/50 dark:hover:text-text-secondary'
             )}
           >
             <Bell size={18} />

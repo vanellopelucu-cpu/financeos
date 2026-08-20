@@ -14,6 +14,7 @@ import { RecentTransactions } from './components/RecentTransactions'
 import { TodaysTransactions } from './components/TodaysTransactions'
 import { HeroBalanceCard } from './components/HeroBalanceCard'
 import { UpcomingBillsReminder } from './components/UpcomingBillsReminder'
+import { DebtCreditSummary } from './components/DebtCreditSummary'
 import { cn } from '../../lib/utils'
 import { DashboardFooter } from './components/DashboardFooter'
 
@@ -137,19 +138,21 @@ export function Dashboard() {
           </div>
         </div>
 
-         <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1 sm:gap-2">
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={() => setShowAddTransaction(true)}
             className={cn(
-              'flex items-center gap-2 rounded-xl bg-workspace px-4 py-2 text-sm font-medium text-white transition-all duration-300 hover:bg-workspace-hover'
+              'flex items-center gap-1.5 rounded-xl bg-workspace px-3 py-2.5 text-sm font-medium text-white transition-all duration-300 hover:bg-workspace-hover sm:gap-2 sm:px-4 sm:py-2'
             )}
           >
             <Plus size={16} />
             <span className="hidden sm:inline">+ Tambah Catatan</span>
             <span className="sm:hidden">+</span>
           </motion.button>
+
+          <div className="hidden sm:block">
 
           <button
             type="button"
@@ -210,7 +213,8 @@ export function Dashboard() {
                  onClose={() => setShowProfile(false)}
                />
              )}
-           </div>
+            </div>
+          </div>
         </div>
       </motion.div>
 
@@ -233,6 +237,11 @@ export function Dashboard() {
       {/* Second Row: Workspace dependent */}
       <motion.div variants={rowVariants}>
         {isIndonesia ? <MoneyPockets /> : <TodaysTransactions />}
+      </motion.div>
+
+      {/* Debt & Credit Summary */}
+      <motion.div variants={rowVariants}>
+        <DebtCreditSummary />
       </motion.div>
 
       {/* Third Row: Recent Transactions Table */}

@@ -4,7 +4,11 @@ import type {
   BalanceInfo,
   Bill,
   BudgetCategory,
+  Credit,
+  CreditReceipt,
   DashboardData,
+  Debt,
+  DebtPayment,
   MoneyPocket,
   Transaction,
   Workspace,
@@ -524,6 +528,26 @@ export const BUDGET_CATEGORIES: Record<string, BudgetCategory[]> = {
   ],
 }
 
+export const DEBTS_DATA: Record<string, Debt[]> = {
+  'indonesia': [],
+  'srilanka': [],
+}
+
+export const CREDITS_DATA: Record<string, Credit[]> = {
+  'indonesia': [],
+  'srilanka': [],
+}
+
+export const DEBT_PAYMENTS_DATA: Record<string, DebtPayment[]> = {
+  'indonesia': [],
+  'srilanka': [],
+}
+
+export const CREDIT_RECEIPTS_DATA: Record<string, CreditReceipt[]> = {
+  'indonesia': [],
+  'srilanka': [],
+}
+
 export const DASHBOARD_DATA: DashboardData = {
   balance: BALANCE_INFO,
   upcomingBills: UPCOMING_BILLS,
@@ -533,4 +557,8 @@ export const DASHBOARD_DATA: DashboardData = {
   accounts: ACCOUNTS_MOCK,
   analytics: ANALYTICS_DATA,
   budgets: BUDGET_CATEGORIES,
+  debts: DEBTS_DATA,
+  credits: CREDITS_DATA,
+  debtPayments: DEBT_PAYMENTS_DATA,
+  creditReceipts: CREDIT_RECEIPTS_DATA,
 }

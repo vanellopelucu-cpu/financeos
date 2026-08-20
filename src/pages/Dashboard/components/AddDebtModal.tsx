@@ -3,7 +3,7 @@ import { X } from 'lucide-react'
 import { useTheme } from '../../../app/providers/ThemeContext'
 import { Card, CardContent, CardHeader } from '../../../components/ui/Card'
 import { cn } from '../../../lib/utils'
-import type { Bill } from '../../../lib/types'
+import type { Debt } from '../../../lib/types'
 import { useState } from 'react'
 
 const backdropVariants: Variants = {
@@ -28,41 +28,40 @@ const modalVariants: Variants = {
   },
 }
 
-const BILL_ICONS = ['💡', '💧', '⚡', '📺', '🌐', '🏠', '🚗', '📱', '💰', '📄']
+const DEBT_ICONS = ['🧾', '💰', '🏠', '🚗', '📱', '📚', '⚡', '💧', '📺', '📄']
 
-interface AddBillModalProps {
+interface AddDebtModalProps {
   open: boolean
   onClose: () => void
-  categories: string[]
-  onSave: (bill: Omit<Bill, 'id' | 'status'> & {
-    recurring: boolean
-    category: string
-  }) => Promise<void>
+  debt: Debt | null
+  onSave: (id: string | null, debt: Partial<Omit<Debt, 'id' | 'payments' | 'status' | 'remainingAmount'>>) => Promise<void>
 }
 
-export function AddBillModal({ open, onClose, categories, onSave }: AddBillModalProps) {
+export function AddDebtModal({ open, onClose, debt, onSave }: AddDebtModalProps) {
   const { theme } = useTheme()
-  const [title, setTitle] = useState('')
-  const [amount, setAmount] = useState('')
-  const [dueDate, setDueDate] = useState('')
-  const [category, setCategory] = useState('Bills & Utilities')
-  const [recurring, setRecurring] = useState(false)
-  const [icon, setIcon] = useState('💡')
+  const isEdit = !!debt
+  const [creditorName, setCreditorName] = useState(debt?.creditorName ?? '')
+  const [amount, setAmount] = useState(debt ? String(debt.amount) : '')
+  const [dueDate, setDueDate] = useState(debt?.dueDate ? debt.dueDate.split('T')[0] : '')
+  const [note, setNote] = useState(debt?.note ?? '')
+  const [icon, setIcon] = useState(debt?.icon || '🧾')
 
   if (!open) return null
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!title.trim() || !amount) return
+    if (!creditorName.trim() || !amount) return
 
-    await onSave({
-      title: title.trim(),
-      amount: Number(amount),
-      dueDate,
-      icon,
-      recurring,
-      category,
-    })
+    await onSave(
+      debt?.id ?? null,
+      {
+        creditorName: creditorName.trim(),
+        amount: Number(amount),
+        dueDate,
+        note: note.trim() || undefined,
+        icon,
+      }
+    )
   }
 
   const today = new Date().toISOString().split('T')[0]
@@ -88,22 +87,24 @@ export function AddBillModal({ open, onClose, categories, onSave }: AddBillModal
           className={cn(
             'relative border-0 p-0 shadow-2xl',
             theme === 'dark'
-              ? 'bg-gradient-to-br from-surface/60 via-surface/40 to-purple-900/10'
-              : 'bg-gradient-to-br from-surface via-surface to-indigo-50/50'
+              ? 'bg-gradient-to-br from-surface/60 via-surface/40 to-red-900/10'
+              : 'bg-gradient-to-br from-surface via-surface to-red-50/50'
           )}
         >
           <div className="absolute inset-0 -z-10 overflow-hidden rounded-2xl">
             <div
               className={cn(
                 'absolute -top-24 -right-24 h-72 w-72 rounded-full blur-3xl',
-                theme === 'dark' ? 'bg-purple-500/15' : 'bg-indigo-300/20'
+                theme === 'dark' ? 'bg-red-500/15' : 'bg-red-300/20'
               )}
             />
           </div>
 
           <CardHeader className="border-b border-border/50 pb-4">
             <div className="flex items-center justify-between px-4 pt-4 sm:px-6 sm:pt-6">
-              <h2 className="text-lg font-semibold text-text">Add Bill</h2>
+              <h2 className="text-lg font-semibold text-text">
+                {isEdit ? 'Edit Hutang' : 'Tambah Hutang'}
+              </h2>
               <motion.button
                 whileHover={{ scale: 1.1, rotate: 90 }}
                 whileTap={{ scale: 0.9 }}
@@ -121,24 +122,24 @@ export function AddBillModal({ open, onClose, categories, onSave }: AddBillModal
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-text-secondary mb-1">
-                  Bill Name
+                  Kreditor
                 </label>
                 <input
                   type="text"
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
+                  value={creditorName}
+                  onChange={(e) => setCreditorName(e.target.value)}
                   required
                   className={cn(
                     'w-full rounded-xl border border-border bg-secondary/50 px-3 py-2 text-sm text-text placeholder:text-text-tertiary focus:border-workspace focus:outline-none'
                   )}
-                  placeholder="e.g. Electricity Bill"
+                  placeholder="e.g. Andi"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-text-secondary mb-1">
-                    Amount
+                    Jumlah
                   </label>
                   <input
                     type="number"
@@ -146,6 +147,7 @@ export function AddBillModal({ open, onClose, categories, onSave }: AddBillModal
                     onChange={(e) => setAmount(e.target.value)}
                     required
                     min="0"
+                    step="1000"
                     className={cn(
                       'w-full rounded-xl border border-border bg-secondary/50 px-3 py-2 text-sm text-text placeholder:text-text-tertiary focus:border-workspace focus:outline-none'
                     )}
@@ -154,7 +156,7 @@ export function AddBillModal({ open, onClose, categories, onSave }: AddBillModal
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-text-secondary mb-1">
-                    Due Date
+                    Jatuh Tempo
                   </label>
                   <input
                     type="date"
@@ -163,7 +165,7 @@ export function AddBillModal({ open, onClose, categories, onSave }: AddBillModal
                     required
                     min={today}
                     className={cn(
-                      'w-full rounded-xl border border-border bg-secondary/50 px-3 py-2 text-sm text-text placeholder:text-text-tertiary focus:border-workspace focus:outline-none'
+                      'w-full cursor-pointer rounded-xl border border-border bg-secondary/50 px-3 py-2 text-sm text-text focus:border-workspace focus:outline-none'
                     )}
                   />
                 </div>
@@ -171,21 +173,17 @@ export function AddBillModal({ open, onClose, categories, onSave }: AddBillModal
 
               <div>
                 <label className="block text-sm font-medium text-text-secondary mb-1">
-                  Category
+                  Catatan
                 </label>
-                <select
-                  value={category}
-                  onChange={(e) => setCategory(e.target.value)}
+                <input
+                  type="text"
+                  value={note}
+                  onChange={(e) => setNote(e.target.value)}
                   className={cn(
-                    'w-full cursor-pointer rounded-xl border border-border bg-secondary/50 px-3 py-2 text-sm text-text focus:border-workspace focus:outline-none'
+                    'w-full rounded-xl border border-border bg-secondary/50 px-3 py-2 text-sm text-text placeholder:text-text-secondary focus:border-workspace focus:outline-none'
                   )}
-                >
-                  {categories.map((cat) => (
-                    <option key={cat} value={cat}>
-                      {cat}
-                    </option>
-                  ))}
-                </select>
+                  placeholder="Opsional"
+                />
               </div>
 
               <div>
@@ -193,7 +191,7 @@ export function AddBillModal({ open, onClose, categories, onSave }: AddBillModal
                   Icon
                 </label>
                 <div className="grid grid-cols-4 gap-2 sm:grid-cols-5">
-                  {BILL_ICONS.map((ic) => (
+                  {DEBT_ICONS.map((ic) => (
                     <button
                       key={ic}
                       type="button"
@@ -201,7 +199,7 @@ export function AddBillModal({ open, onClose, categories, onSave }: AddBillModal
                       className={cn(
                         'flex h-10 w-10 items-center justify-center rounded-xl text-xl transition-all',
                         icon === ic
-                          ? 'ring-2 ring-workspace bg-workspace/10'
+                          ? 'ring-2 ring-red-500 bg-red-500/10'
                           : 'hover:bg-secondary'
                       )}
                     >
@@ -209,18 +207,6 @@ export function AddBillModal({ open, onClose, categories, onSave }: AddBillModal
                     </button>
                   ))}
                 </div>
-              </div>
-
-              <div className="flex items-center justify-between">
-                <label className="flex items-center gap-2 text-sm text-text-secondary">
-                  <input
-                    type="checkbox"
-                    checked={recurring}
-                    onChange={(e) => setRecurring(e.target.checked)}
-                    className="h-4 w-4 rounded border-border text-workspace focus:ring-workspace"
-                  />
-                  Recurring bill
-                </label>
               </div>
 
               <div className="flex items-center justify-end gap-3 border-t border-border/50 pt-4">
@@ -231,16 +217,16 @@ export function AddBillModal({ open, onClose, categories, onSave }: AddBillModal
                     'rounded-xl border border-border px-5 py-2 text-sm font-medium text-text-secondary transition-all hover:bg-border'
                   )}
                 >
-                  Cancel
+                  Batal
                 </button>
                 <button
                   type="submit"
-                  disabled={!title.trim() || !amount}
+                  disabled={!creditorName.trim() || !amount}
                   className={cn(
-                    'rounded-xl border border-transparent bg-gradient-to-r from-purple-500 to-indigo-600 px-5 py-2 text-sm font-medium text-white transition-all hover:from-purple-600 hover:to-indigo-700 disabled:opacity-50'
+                    'rounded-xl border border-transparent bg-gradient-to-r from-red-500 to-rose-600 px-5 py-2 text-sm font-medium text-white transition-all hover:from-red-600 hover:to-rose-700 disabled:opacity-50'
                   )}
                 >
-                  Save
+                  {isEdit ? 'Simpan' : 'Tambah'}
                 </button>
               </div>
             </form>

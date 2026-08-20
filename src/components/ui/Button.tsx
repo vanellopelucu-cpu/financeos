@@ -42,9 +42,9 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       secondary:
         'bg-secondary text-text hover:bg-secondary/80 border border-border',
       ghost:
-        'text-text-secondary hover:bg-primary-200/30 hover:text-primary-700',
+        'text-text-secondary hover:bg-primary-200/30 hover:text-primary-700 dark:hover:bg-secondary/50 dark:hover:text-text',
       outline:
-        'border border-border text-text hover:bg-primary-200/30',
+        'border border-border text-text hover:bg-primary-200/30 dark:hover:bg-secondary/50',
       workspace: workspaceTheme
         ? 'bg-gradient-to-r from-workspace to-workspace-hover text-white shadow-md hover:shadow-lg'
         : 'bg-gradient-to-r from-primary-400 to-secondary-400 text-white hover:from-primary-500 hover:to-secondary-500',

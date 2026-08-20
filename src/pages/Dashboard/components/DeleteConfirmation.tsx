@@ -57,7 +57,7 @@ export function DeleteConfirmation({
         initial="hidden"
         animate="visible"
         exit="exit"
-        className="w-full max-w-md"
+        className="w-full max-w-[90vw] sm:max-w-md"
       >
         <Card
           glass
@@ -85,7 +85,7 @@ export function DeleteConfirmation({
           </div>
 
           <CardHeader className="border-b border-border/50 pb-4">
-            <div className="flex items-center justify-between px-6 pt-6">
+            <div className="flex items-center justify-between px-4 pt-4 sm:px-6 sm:pt-6">
                 <CardTitle className="text-lg font-semibold text-text">
                 Delete this pocket?
               </CardTitle>
@@ -94,7 +94,7 @@ export function DeleteConfirmation({
                 whileTap={{ scale: 0.9 }}
                 onClick={onClose}
                 className={cn(
-                  'flex h-7 w-7 items-center justify-center rounded-lg text-text-tertiary transition-all hover:bg-secondary hover:text-text'
+                  'flex h-9 w-9 items-center justify-center rounded-lg text-text-tertiary transition-all hover:bg-secondary hover:text-text'
                 )}
               >
                 <X size={16} />
@@ -102,7 +102,7 @@ export function DeleteConfirmation({
             </div>
           </CardHeader>
 
-          <CardContent className="p-6">
+          <CardContent className="p-4 sm:p-6">
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
@@ -155,3 +155,4 @@ export function DeleteConfirmation({
     </motion.div>
   )
 }
+

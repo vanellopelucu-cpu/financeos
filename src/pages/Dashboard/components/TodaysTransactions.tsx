@@ -45,7 +45,7 @@ export function TodaysTransactions() {
           </div>
         </CardHeader>
 
-        <CardContent>
+        <CardContent className="p-4 sm:p-6">
           {todayTransactions.length === 0 ? (
             <div className="py-8 text-center">
               <p className="text-sm text-text-secondary">
@@ -54,7 +54,7 @@ export function TodaysTransactions() {
             </div>
           ) : (
             <>
-              <div className="mb-4 flex gap-6">
+              <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:gap-6">
                 <div className="flex items-center gap-2">
                   <TrendingUp size={16} className="text-sri-500" />
                   <span className="text-sm text-text-secondary">
@@ -131,3 +131,4 @@ export function TodaysTransactions() {
     </motion.div>
   )
 }
+

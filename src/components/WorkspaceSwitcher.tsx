@@ -12,7 +12,7 @@ export function WorkspaceSwitcher() {
         value={currentWorkspace.id}
         onChange={(e) => setWorkspace(e.target.value as typeof currentWorkspace.id)}
         className={cn(
-          'appearance-none w-full cursor-pointer rounded-2xl border border-border bg-secondary px-3 py-2.5 text-sm font-medium text-text transition-all duration-300 hover:bg-primary-200/30 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2'
+          'appearance-none w-full cursor-pointer rounded-2xl border border-border bg-secondary px-3 py-2.5 text-sm font-medium text-text transition-all duration-300 hover:bg-primary-200/30 dark:hover:bg-secondary/50 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2'
         )}
       >
         {workspaces.map((ws: Workspace) => (
