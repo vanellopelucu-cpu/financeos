@@ -59,7 +59,7 @@ export interface Debt {
   amount: number
   remainingAmount: number
   status: DebtStatus
-  dueDate: string
+  dueDate?: string
   note?: string
   icon?: string
   payments: DebtPayment[]
@@ -73,7 +73,7 @@ export interface Credit {
   amount: number
   remainingAmount: number
   status: CreditStatus
-  dueDate: string
+  dueDate?: string
   note?: string
   icon?: string
   receipts: CreditReceipt[]

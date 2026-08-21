@@ -138,7 +138,6 @@ export function DebtsAndCredits() {
         amount: debt.amount,
         remainingAmount: debt.amount,
         status: 'unpaid' as const,
-        dueDate: debt.dueDate || '',
         note: debt.note,
         icon: debt.icon,
       })
@@ -227,7 +226,6 @@ export function DebtsAndCredits() {
         amount: credit.amount,
         remainingAmount: credit.amount,
         status: 'unreceived' as const,
-        dueDate: credit.dueDate || '',
         note: credit.note,
         icon: credit.icon,
       })
@@ -303,12 +301,12 @@ export function DebtsAndCredits() {
   const filteredDebts = [...debts].filter((d) => {
     if (debtFilter === 'all') return true
     return d.status === debtFilter
-  }).sort((a, b) => new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime())
+  }).sort((a, b) => b.amount - a.amount)
 
   const filteredCredits = [...credits].filter((c) => {
     if (creditFilter === 'all') return true
     return c.status === creditFilter
-  }).sort((a, b) => new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime())
+  }).sort((a, b) => b.amount - a.amount)
 
   const formatPaymentDate = (d: DebtPayment) => formatDate(d.paymentDate)
   const formatReceiptDate = (r: CreditReceipt) => formatDate(r.receiptDate)
@@ -417,17 +415,16 @@ export function DebtsAndCredits() {
                     </div>
                   ) : (
                     <>
-                    <table className="hidden w-full sm:table">
-                      <thead>
-                        <tr className="border-b border-border/50">
-                          <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-text-tertiary">Kreditor</th>
-                          <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-text-tertiary">Jatuh Tempo</th>
-                          <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-text-tertiary">Status</th>
-                          <th className="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-text-tertiary">Total</th>
-                          <th className="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-text-tertiary">Sisa</th>
-                          <th className="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-text-tertiary">Aksi</th>
-                        </tr>
-                      </thead>
+                     <table className="hidden w-full sm:table">
+                       <thead>
+                         <tr className="border-b border-border/50">
+                           <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-text-tertiary">Kreditor</th>
+                           <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-text-tertiary">Status</th>
+                           <th className="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-text-tertiary">Total</th>
+                           <th className="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-text-tertiary">Sisa</th>
+                           <th className="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-text-tertiary">Aksi</th>
+                         </tr>
+                       </thead>
                       <tbody>
                         {filteredDebts.map((debt) => {
                           const isPaid = debt.status === 'paid'
@@ -441,21 +438,20 @@ export function DebtsAndCredits() {
                               whileHover={{ backgroundColor: 'hsl(var(--color-bg-secondary) / 0.5)' }}
                               className="border-b border-border/30 transition-colors last:border-0"
                             >
-                              <td className="px-6 py-4">
-                                <div className="flex items-center gap-3">
-                                  <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg bg-secondary text-lg">
-                                    {debt.icon || '🧾'}
-                                  </div>
-                                  <div>
-                                    <span className="font-medium text-text">{debt.creditorName}</span>
-                                    {debt.note && (
-                                      <p className="text-xs text-text-tertiary">{debt.note}</p>
-                                    )}
-                                  </div>
-                                </div>
-                              </td>
-                              <td className="px-6 py-4 text-sm text-text-secondary">{formatDate(debt.dueDate)}</td>
-                              <td className="px-6 py-4">
+                                <td className="px-6 py-4">
+                                 <div className="flex items-center gap-3">
+                                   <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg bg-secondary text-lg">
+                                     {debt.icon || '🧾'}
+                                   </div>
+                                   <div>
+                                     <span className="font-medium text-text">{debt.creditorName}</span>
+                                     {debt.note && (
+                                       <p className="text-xs text-text-tertiary">{debt.note}</p>
+                                     )}
+                                   </div>
+                                 </div>
+                               </td>
+                               <td className="px-6 py-4">
                                 <Badge className={cn('border', statusConfig.badgeClass)}>
                                   {statusConfig.label}
                                 </Badge>
@@ -539,9 +535,9 @@ export function DebtsAndCredits() {
                       {filteredDebts.map((debt) => {
                          const isExpanded = expandedDebts.has(debt.id)
                          if (!isExpanded || (debt.payments || []).length === 0) return null
-                         return (
-                           <tr key={`expand-${debt.id}`} className="border-b border-border/20">
-                             <td colSpan={6} className="px-6 py-3">
+                          return (
+                            <tr key={`expand-${debt.id}`} className="border-b border-border/20">
+                              <td colSpan={5} className="px-6 py-3">
                                <div className="ml-12 space-y-2">
                                  <p className="text-xs font-medium uppercase tracking-wider text-text-tertiary">
                                    Riwayat Pembayaran
@@ -584,16 +580,15 @@ export function DebtsAndCredits() {
                                <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-secondary text-xl">
                                  {debt.icon || '🧾'}
                                </div>
-                               <div className="flex-1">
-                                 <span className="font-medium text-text">{debt.creditorName}</span>
-                                 {debt.note && (
-                                   <p className="text-xs text-text-tertiary">{debt.note}</p>
-                                 )}
-                                 <Badge className={cn('border mt-1', statusConfig.badgeClass)}>
-                                   {statusConfig.label}
-                                 </Badge>
-                                 <p className="mt-1 text-xs text-text-tertiary">{formatDate(debt.dueDate)}</p>
-                               </div>
+                                <div className="flex-1">
+                                  <span className="font-medium text-text">{debt.creditorName}</span>
+                                  {debt.note && (
+                                    <p className="text-xs text-text-tertiary">{debt.note}</p>
+                                  )}
+                                  <Badge className={cn('border mt-1', statusConfig.badgeClass)}>
+                                    {statusConfig.label}
+                                  </Badge>
+                                </div>
                                <div className="text-right">
                                  <p className="text-xs text-text-tertiary">Total</p>
                                  <p className="font-semibold text-text">{formatCurrencyFull(debt.amount, currency.code)}</p>
@@ -734,17 +729,16 @@ export function DebtsAndCredits() {
                     </div>
                   ) : (
                      <>
-                        <table className="hidden w-full sm:table">
-                        <thead>
-                        <tr className="border-b border-border/50">
-                          <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-text-tertiary">Debitur</th>
-                          <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-text-tertiary">Jatuh Tempo</th>
-                          <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-text-tertiary">Status</th>
-                          <th className="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-text-tertiary">Total</th>
-                          <th className="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-text-tertiary">Sisa</th>
-                          <th className="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-text-tertiary">Aksi</th>
-                        </tr>
-                      </thead>
+                         <table className="hidden w-full sm:table">
+                         <thead>
+                         <tr className="border-b border-border/50">
+                           <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-text-tertiary">Debitur</th>
+                           <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-text-tertiary">Status</th>
+                           <th className="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-text-tertiary">Total</th>
+                           <th className="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-text-tertiary">Sisa</th>
+                           <th className="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-text-tertiary">Aksi</th>
+                         </tr>
+                       </thead>
                       <tbody>
                         {filteredCredits.map((credit) => {
                           const isReceived = credit.status === 'received'
@@ -756,21 +750,20 @@ export function DebtsAndCredits() {
                               whileHover={{ backgroundColor: 'hsl(var(--color-bg-secondary) / 0.5)' }}
                               className="border-b border-border/30 transition-colors last:border-0"
                             >
-                              <td className="px-6 py-4">
-                                <div className="flex items-center gap-3">
-                                  <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg bg-secondary text-lg">
-                                    {credit.icon || '💰'}
-                                  </div>
-                                  <div>
-                                    <span className="font-medium text-text">{credit.debtorName}</span>
-                                    {credit.note && (
-                                      <p className="text-xs text-text-tertiary">{credit.note}</p>
-                                    )}
-                                  </div>
-                                </div>
-                              </td>
-                              <td className="px-6 py-4 text-sm text-text-secondary">{formatDate(credit.dueDate)}</td>
-                              <td className="px-6 py-4">
+                               <td className="px-6 py-4">
+                                 <div className="flex items-center gap-3">
+                                   <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg bg-secondary text-lg">
+                                     {credit.icon || '💰'}
+                                   </div>
+                                   <div>
+                                     <span className="font-medium text-text">{credit.debtorName}</span>
+                                     {credit.note && (
+                                       <p className="text-xs text-text-tertiary">{credit.note}</p>
+                                     )}
+                                   </div>
+                                 </div>
+                               </td>
+                               <td className="px-6 py-4">
                                 <Badge className={cn('border', statusConfig.badgeClass)}>
                                   {statusConfig.label}
                                 </Badge>
@@ -859,9 +852,9 @@ export function DebtsAndCredits() {
                       {filteredCredits.map((credit) => {
                          const isExpanded = expandedDebts.has(credit.id)
                          if (!isExpanded || (credit.receipts || []).length === 0) return null
-                         return (
-                           <tr key={`expand-credit-${credit.id}`} className="border-b border-border/20">
-                             <td colSpan={6} className="px-6 py-3">
+                          return (
+                            <tr key={`expand-credit-${credit.id}`} className="border-b border-border/20">
+                              <td colSpan={5} className="px-6 py-3">
                                <div className="ml-12 space-y-2">
                                  <p className="text-xs font-medium uppercase tracking-wider text-text-tertiary">
                                    Riwayat Penerimaan
@@ -904,16 +897,15 @@ export function DebtsAndCredits() {
                                <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-secondary text-xl">
                                  {credit.icon || '💰'}
                                </div>
-                               <div className="flex-1">
-                                 <span className="font-medium text-text">{credit.debtorName}</span>
-                                 {credit.note && (
-                                   <p className="text-xs text-text-tertiary">{credit.note}</p>
-                                 )}
-                                 <Badge className={cn('border mt-1', statusConfig.badgeClass)}>
-                                   {statusConfig.label}
-                                 </Badge>
-                                 <p className="mt-1 text-xs text-text-tertiary">{formatDate(credit.dueDate)}</p>
-                               </div>
+                                <div className="flex-1">
+                                  <span className="font-medium text-text">{credit.debtorName}</span>
+                                  {credit.note && (
+                                    <p className="text-xs text-text-tertiary">{credit.note}</p>
+                                  )}
+                                  <Badge className={cn('border mt-1', statusConfig.badgeClass)}>
+                                    {statusConfig.label}
+                                  </Badge>
+                                </div>
                                <div className="text-right">
                                  <p className="text-xs text-text-tertiary">Total</p>
                                  <p className="font-semibold text-text">{formatCurrencyFull(credit.amount, currency.code)}</p>

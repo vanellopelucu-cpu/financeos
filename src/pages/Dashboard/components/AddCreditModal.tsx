@@ -42,7 +42,6 @@ export function AddCreditModal({ open, onClose, credit, onSave }: AddCreditModal
   const isEdit = !!credit
   const [debtorName, setDebtorName] = useState(credit?.debtorName ?? '')
   const [amount, setAmount] = useState(credit ? String(credit.amount) : '')
-  const [dueDate, setDueDate] = useState(credit?.dueDate ? credit.dueDate.split('T')[0] : '')
   const [note, setNote] = useState(credit?.note ?? '')
   const [icon, setIcon] = useState(credit?.icon || '💰')
 
@@ -57,14 +56,11 @@ export function AddCreditModal({ open, onClose, credit, onSave }: AddCreditModal
       {
         debtorName: debtorName.trim(),
         amount: Number(amount),
-        dueDate,
         note: note.trim() || undefined,
         icon,
       }
     )
   }
-
-  const today = new Date().toISOString().split('T')[0]
 
   return (
     <motion.div
@@ -136,39 +132,22 @@ export function AddCreditModal({ open, onClose, credit, onSave }: AddCreditModal
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-text-secondary mb-1">
-                    Jumlah
-                  </label>
-                  <input
-                    type="number"
-                    value={amount}
-                    onChange={(e) => setAmount(e.target.value)}
-                    required
-                    min="0"
-                    step="1000"
-                    className={cn(
-                      'w-full rounded-xl border border-border bg-secondary/50 px-3 py-2 text-sm text-text placeholder:text-text-tertiary focus:border-workspace focus:outline-none'
-                    )}
-                    placeholder="0"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-text-secondary mb-1">
-                    Jatuh Tempo
-                  </label>
-                  <input
-                    type="date"
-                    value={dueDate}
-                    onChange={(e) => setDueDate(e.target.value)}
-                    required
-                    min={today}
-                    className={cn(
-                      'w-full cursor-pointer rounded-xl border border-border bg-secondary/50 px-3 py-2 text-sm text-text focus:border-workspace focus:outline-none'
-                    )}
-                  />
-                </div>
+              <div>
+                <label className="block text-sm font-medium text-text-secondary mb-1">
+                  Jumlah
+                </label>
+                <input
+                  type="number"
+                  value={amount}
+                  onChange={(e) => setAmount(e.target.value)}
+                  required
+                  min="0"
+                  step="1000"
+                  className={cn(
+                    'w-full rounded-xl border border-border bg-secondary/50 px-3 py-2 text-sm text-text placeholder:text-text-tertiary focus:border-workspace focus:outline-none'
+                  )}
+                  placeholder="0"
+                />
               </div>
 
               <div>
