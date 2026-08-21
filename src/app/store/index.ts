@@ -1501,7 +1501,7 @@ payBill: async (bill, paidDate) => {
                 title: debt.creditorName,
                 amount: debt.amount,
                 currency: WORKSPACES.find((w) => w.id === workspace)?.currency.code || 'IDR',
-                due_date: debt.dueDate,
+                due_date: debt.dueDate || '2099-12-31',
                 status: debt.status === 'paid' ? 'paid' : 'unpaid',
                 icon: debt.icon || '🧾',
                 provider: JSON.stringify(provider),
@@ -1509,7 +1509,7 @@ payBill: async (bill, paidDate) => {
 
             if (error) {
               console.error('Failed to add debt:', error)
-              return { success: false, error: 'Failed to add debt.' }
+              return { success: false, error: 'Gagal menambahkan hutang.' }
             }
 
             await get().fetchDebts()
@@ -1559,7 +1559,7 @@ payBill: async (bill, paidDate) => {
               .update({
                 title: debt.creditorName ?? provider.creditorName,
                 amount: debt.amount,
-                due_date: debt.dueDate,
+                due_date: debt.dueDate || '2099-12-31',
                 icon: debt.icon,
                 provider: JSON.stringify(updatedProvider),
               })
@@ -1568,7 +1568,7 @@ payBill: async (bill, paidDate) => {
 
             if (error) {
               console.error('Failed to edit debt:', error)
-              return { success: false, error: 'Failed to edit debt.' }
+              return { success: false, error: 'Gagal mengedit hutang.' }
             }
 
             await get().fetchDebts()
@@ -1832,7 +1832,7 @@ payBill: async (bill, paidDate) => {
                 title: credit.debtorName,
                 amount: credit.amount,
                 currency: WORKSPACES.find((w) => w.id === workspace)?.currency.code || 'IDR',
-                due_date: credit.dueDate,
+                due_date: credit.dueDate || '2099-12-31',
                 status: credit.status === 'received' ? 'paid' : 'unpaid',
                 icon: credit.icon || '💰',
                 provider: JSON.stringify(provider),
@@ -1840,7 +1840,7 @@ payBill: async (bill, paidDate) => {
 
             if (error) {
               console.error('Failed to add credit:', error)
-              return { success: false, error: 'Failed to add credit.' }
+              return { success: false, error: 'Gagal menambahkan piutang.' }
             }
 
             await get().fetchCredits()
@@ -1890,7 +1890,7 @@ payBill: async (bill, paidDate) => {
               .update({
                 title: credit.debtorName ?? provider.debtorName,
                 amount: credit.amount,
-                due_date: credit.dueDate,
+                due_date: credit.dueDate || '2099-12-31',
                 icon: credit.icon,
                 provider: JSON.stringify(updatedProvider),
               })
@@ -1899,7 +1899,7 @@ payBill: async (bill, paidDate) => {
 
             if (error) {
               console.error('Failed to edit credit:', error)
-              return { success: false, error: 'Failed to edit credit.' }
+              return { success: false, error: 'Gagal mengedit piutang.' }
             }
 
             await get().fetchCredits()
