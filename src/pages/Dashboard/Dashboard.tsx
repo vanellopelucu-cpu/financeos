@@ -14,7 +14,6 @@ import { RecentTransactions } from './components/RecentTransactions'
 import { TodaysTransactions } from './components/TodaysTransactions'
 import { HeroBalanceCard } from './components/HeroBalanceCard'
 import { UpcomingBillsReminder } from './components/UpcomingBillsReminder'
-import { DebtCreditSummary } from './components/DebtCreditSummary'
 import { cn } from '../../lib/utils'
 import { DashboardFooter } from './components/DashboardFooter'
 
@@ -102,18 +101,18 @@ export function Dashboard() {
       animate="visible"
       className="flex flex-col gap-6 pt-2"
     >
-      {/* Page Header */}
-      <motion.div
-        variants={rowVariants}
-        className="flex items-start justify-between gap-4"
-      >
-        <div className="flex flex-col gap-1">
-          <motion.h1
-            className="text-3xl font-bold tracking-tight text-text"
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, ease: 'easeOut' }}
-          >
+       {/* Page Header */}
+       <motion.div
+         variants={rowVariants}
+         className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between"
+       >
+         <div className="flex flex-col gap-1">
+           <motion.h1
+             className="text-2xl font-bold tracking-tight text-text md:text-3xl"
+             initial={{ opacity: 0, y: -10 }}
+             animate={{ opacity: 1, y: 0 }}
+             transition={{ duration: 0.5, ease: 'easeOut' }}
+           >
             {greeting}, Yaya 🌸
           </motion.h1>
 
@@ -221,11 +220,11 @@ export function Dashboard() {
       {/* Low Balance Warning - appears automatically when below threshold */}
       <LowBalanceWarning />
 
-      {/* Top Row: Hero Balance Card (left) + Upcoming Bills (right) */}
-      <motion.div
-        variants={rowVariants}
-        className="grid grid-cols-1 gap-6 lg:grid-cols-3"
-      >
+       {/* Top Row: Hero Balance Card (left) + Upcoming Bills (right) */}
+       <motion.div
+         variants={rowVariants}
+         className="grid grid-cols-1 gap-4 lg:grid-cols-3 lg:gap-6"
+       >
         <div className="lg:col-span-2">
           <HeroBalanceCard />
         </div>
@@ -234,17 +233,12 @@ export function Dashboard() {
         </div>
       </motion.div>
 
-      {/* Second Row: Workspace dependent */}
-      <motion.div variants={rowVariants}>
-        {isIndonesia ? <MoneyPockets /> : <TodaysTransactions />}
-      </motion.div>
+       {/* Second Row: Workspace dependent */}
+       <motion.div variants={rowVariants}>
+         {isIndonesia ? <MoneyPockets /> : <TodaysTransactions />}
+       </motion.div>
 
-      {/* Debt & Credit Summary */}
-      <motion.div variants={rowVariants}>
-        <DebtCreditSummary />
-      </motion.div>
-
-      {/* Third Row: Recent Transactions Table */}
+       {/* Third Row: Recent Transactions Table */}
       <motion.div variants={rowVariants}>
         <RecentTransactions />
       </motion.div>

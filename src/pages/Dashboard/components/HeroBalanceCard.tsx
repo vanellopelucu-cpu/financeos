@@ -84,10 +84,10 @@ export function HeroBalanceCard() {
               workspace={currentWorkspace.theme === 'green'}
             />
           </div>
-          <motion.p
-            variants={fadeInUp}
-            className="text-5xl font-black tracking-tight text-text md:text-6xl"
-          >
+           <motion.p
+             variants={fadeInUp}
+             className="text-3xl font-black tracking-tight text-text md:text-6xl"
+           >
             {formatCurrencyFull(balance.availableBalance, currency.code)}
           </motion.p>
           <motion.p
@@ -98,56 +98,56 @@ export function HeroBalanceCard() {
             </motion.p>
         </CardHeader>
 
-        <CardContent className="relative grid grid-cols-1 gap-3 p-4 sm:grid-cols-3 sm:gap-4 sm:p-6">
-          <motion.div
-            variants={fadeInUp}
-            className="flex flex-col items-center gap-2 rounded-xl border border-border/50 bg-secondary/50 p-4"
-          >
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-workspace/10 text-workspace">
-              <TrendingUp size={20} />
-            </div>
-            <p className="text-xs font-medium uppercase tracking-wider text-text-tertiary">
-              Income
-            </p>
-            <p className="text-xl font-bold text-workspace">
-              {formatCurrencyFull(balance.income, currency.code)}
-            </p>
-          </motion.div>
+        <CardContent className="relative grid grid-cols-1 gap-2 p-3 sm:grid-cols-3 sm:gap-4 sm:p-6">
+           <motion.div
+             variants={fadeInUp}
+             className="flex flex-col items-center gap-1 rounded-xl border border-border/50 bg-secondary/50 p-3 sm:gap-2 sm:p-4"
+           >
+             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-workspace/10 text-workspace sm:h-10 sm:w-10">
+               <TrendingUp size={16} />
+             </div>
+             <p className="text-xs font-medium uppercase tracking-wider text-text-tertiary">
+               Income
+             </p>
+             <p className="text-lg font-bold text-workspace sm:text-xl">
+               {formatCurrencyFull(balance.income, currency.code)}
+             </p>
+           </motion.div>
 
-          <motion.div
-            variants={fadeInUp}
-            className="flex flex-col items-center gap-2 rounded-xl border border-border/50 bg-secondary/50 p-4"
-          >
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-red-500/10 text-red-500">
-              <TrendingDown size={20} />
-            </div>
-            <p className="text-xs font-medium uppercase tracking-wider text-text-tertiary">
-              Expenses
-            </p>
-            <p className="text-xl font-bold text-red-500">
-              -{formatCurrencyFull(balance.expenses, currency.code)}
-            </p>
-          </motion.div>
+           <motion.div
+             variants={fadeInUp}
+             className="flex flex-col items-center gap-1 rounded-xl border border-border/50 bg-secondary/50 p-3 sm:gap-2 sm:p-4"
+           >
+             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-red-500/10 text-red-500 sm:h-10 sm:w-10">
+               <TrendingDown size={16} />
+             </div>
+             <p className="text-xs font-medium uppercase tracking-wider text-text-tertiary">
+               Expenses
+             </p>
+             <p className="text-lg font-bold text-red-500 sm:text-xl">
+               -{formatCurrencyFull(balance.expenses, currency.code)}
+             </p>
+           </motion.div>
 
-          <motion.div
-            variants={fadeInUp}
-            className="flex flex-col items-center gap-2 rounded-xl border border-border/50 bg-secondary/50 p-4"
-          >
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-workspace/10 text-workspace">
-              <Wallet size={20} />
-            </div>
-            <p className="text-xs font-medium uppercase tracking-wider text-text-tertiary">
-              Remaining Budget
-            </p>
-            <p
-              className={cn(
-                'text-xl font-bold',
-                net >= 0 ? 'text-workspace' : 'text-red-500'
-              )}
-            >
-              {formatCurrencyFull(net, currency.code)}
-            </p>
-          </motion.div>
+           <motion.div
+             variants={fadeInUp}
+             className="flex flex-col items-center gap-1 rounded-xl border border-border/50 bg-secondary/50 p-3 sm:gap-2 sm:p-4"
+           >
+             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-workspace/10 text-workspace sm:h-10 sm:w-10">
+               <Wallet size={16} />
+             </div>
+             <p className="text-xs font-medium uppercase tracking-wider text-text-tertiary">
+               Remaining Budget
+             </p>
+             <p
+               className={cn(
+                 'text-lg font-bold sm:text-xl',
+                 net >= 0 ? 'text-workspace' : 'text-red-500'
+               )}
+             >
+               {formatCurrencyFull(net, currency.code)}
+             </p>
+           </motion.div>
         </CardContent>
       </Card>
     </motion.div>

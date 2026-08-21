@@ -241,31 +241,31 @@ export function MoneyPockets() {
                 key={pocket.id}
                 variants={cardVariants}
                 whileHover={{ y: -4, scale: 1.02 }}
-                className={cn(
-                  'group relative overflow-hidden rounded-2xl border border-border/50 bg-secondary/30 p-5 transition-all duration-300'
-                )}
-              >
-                <div className="absolute inset-0 -z-10">
-                  <div
-                    className={cn(
-                      'absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500',
-                      currentWorkspace.theme === 'green'
-                        ? 'bg-gradient-to-br from-sri-500/5 to-transparent'
-                        : 'bg-gradient-to-br from-indo-500/5 to-transparent'
-                    )}
-                  />
-                </div>
+                 className={cn(
+                   'group relative overflow-hidden rounded-2xl border border-border/50 bg-secondary/30 p-4 transition-all duration-300 sm:p-5'
+                 )}
+               >
+                 <div className="absolute inset-0 -z-10">
+                   <div
+                     className={cn(
+                       'absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500',
+                       currentWorkspace.theme === 'green'
+                         ? 'bg-gradient-to-br from-sri-500/5 to-transparent'
+                         : 'bg-gradient-to-br from-indo-500/5 to-transparent'
+                     )}
+                   />
+                 </div>
 
-                <div className="mb-3 flex items-center gap-3">
-                  <span className="text-3xl">{pocket.icon}</span>
-                  <h3 className="text-base font-semibold text-text">
-                    {pocket.name}
-                  </h3>
-                </div>
+                 <div className="mb-2 flex items-center gap-2 sm:mb-3 sm:gap-3">
+                   <span className="text-2xl sm:text-3xl">{pocket.icon}</span>
+                   <h3 className="text-sm font-semibold text-text sm:text-base">
+                     {pocket.name}
+                   </h3>
+                 </div>
 
-                <p className="text-2xl font-bold text-text">
-                  {formatCurrencyFull(pocket.currentAmount, currency.code)}
-                </p>
+                 <p className="text-xl font-bold text-text sm:text-2xl">
+                   {formatCurrencyFull(pocket.currentAmount, currency.code)}
+                 </p>
 
                 <div className="mt-3 space-y-2">
                   <div className="flex items-center justify-between text-xs text-text-secondary">

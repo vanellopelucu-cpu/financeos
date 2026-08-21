@@ -169,31 +169,31 @@ export function UpcomingBillsReminder() {
               },
             }}
           >
-            {sortedBills.length === 0 ? (
-              <div className="py-8 text-center">
-                <p className="text-sm text-text-secondary">
-                  No upcoming bills.
-                </p>
-              </div>
-            ) : (
-              sortedBills.map((bill) => {
+             {sortedBills.length === 0 ? (
+               <div className="py-6 text-center">
+                 <p className="text-sm text-text-secondary">
+                   No upcoming bills.
+                 </p>
+               </div>
+             ) : (
+               sortedBills.slice(0, 3).map((bill) => {
                 const isPaid = bill.status === 'paid'
                 const isOverdue = bill.status === 'overdue'
 
                 return (
-                  <motion.div
-                    key={bill.id}
-                    variants={itemVariants}
-                    className={cn(
-                      'group flex items-center justify-between border-b border-border/30 p-4 transition-all last:border-0',
-                      isPaid ? 'opacity-75' : ''
-                    )}
-                  >
-                       <div className="flex items-center gap-3">
-                      <div className={cn(
-                        'flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl text-2xl shadow-soft',
-                        isPaid ? 'bg-success-500/10' : isOverdue ? 'bg-red-500/10' : 'bg-secondary'
-                      )}>
+                   <motion.div
+                     key={bill.id}
+                     variants={itemVariants}
+                     className={cn(
+                       'group flex items-center justify-between gap-2 border-b border-border/30 p-3 transition-all last:border-0 sm:p-4',
+                       isPaid ? 'opacity-75' : ''
+                     )}
+                   >
+                        <div className="flex items-center gap-2 sm:gap-3">
+                       <div className={cn(
+                         'flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg text-lg shadow-soft sm:h-12 sm:w-12 sm:rounded-xl sm:text-2xl',
+                         isPaid ? 'bg-success-500/10' : isOverdue ? 'bg-red-500/10' : 'bg-secondary'
+                       )}>
                         {bill.icon || '📄'}
                       </div>
                       <div>
@@ -228,10 +228,10 @@ export function UpcomingBillsReminder() {
                         </div>
                       </div>
                     </div>
-                      <div className="flex items-center gap-2">
-                      <span className="text-right font-semibold text-text">
-                        {formatCurrencyFull(bill.amount, currency.code)}
-                      </span>
+                       <div className="flex items-center gap-1 sm:gap-2">
+                       <span className="text-right text-sm font-semibold text-text sm:text-base">
+                         {formatCurrencyFull(bill.amount, currency.code)}
+                       </span>
 
                       {!isPaid && (
                         <motion.button

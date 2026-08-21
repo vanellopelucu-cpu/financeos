@@ -173,30 +173,30 @@ export function RecentTransactions() {
                       delay: index * 0.03,
                       ease: 'easeOut',
                     }}
-                    className="flex items-center justify-between rounded-xl border border-border/50 bg-secondary/30 p-4"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-secondary text-lg">
-                        {tx.icon || getCategoryIcon(tx.category)}
-                      </div>
-                      <div>
-                        <span className="font-medium text-text block">
-                          {tx.description}
-                        </span>
-                        <span className="text-sm text-text-secondary block">
-                          {tx.category}
-                        </span>
-                        <p className="text-xs text-text-tertiary mt-1">
-                          {formatDate(tx.date)}
-                        </p>
-                      </div>
-                    </div>
-                    <span
-                      className={cn(
-                        'text-lg font-semibold',
-                        tx.amount >= 0 ? 'text-workspace' : 'text-red-500'
-                      )}
-                    >
+                     className="flex items-center justify-between rounded-xl border border-border/50 bg-secondary/30 p-3 sm:p-4"
+                   >
+                     <div className="flex items-center gap-2 sm:gap-3">
+                       <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-secondary text-base sm:h-10 sm:w-10 sm:text-lg">
+                         {tx.icon || getCategoryIcon(tx.category)}
+                       </div>
+                       <div className="min-w-0 flex-1">
+                         <span className="font-medium text-text block text-sm sm:text-base truncate">
+                           {tx.description}
+                         </span>
+                         <span className="text-xs text-text-secondary block">
+                           {tx.category}
+                         </span>
+                         <p className="text-xs text-text-tertiary hidden sm:block">
+                           {formatDate(tx.date)}
+                         </p>
+                       </div>
+                     </div>
+                     <span
+                       className={cn(
+                         'text-sm font-semibold sm:text-lg flex-shrink-0 ml-2',
+                         tx.amount >= 0 ? 'text-workspace' : 'text-red-500'
+                       )}
+                     >
                       {tx.amount >= 0 ? '+' : '-'}
                       {formatCurrencyFull(Math.abs(tx.amount), currency.code)}
                     </span>

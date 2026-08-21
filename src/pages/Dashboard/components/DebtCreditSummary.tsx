@@ -58,40 +58,40 @@ export function DebtCreditSummary() {
           <div className="space-y-3">
             <motion.div
               variants={itemVariants}
-              className="rounded-xl border border-border/50 bg-secondary/30 p-4"
+              className="rounded-xl border border-border/50 bg-secondary/30 p-3 sm:p-4"
             >
-              <div className="mb-2 flex items-center gap-2">
-                <div className="flex h-6 w-6 items-center justify-center rounded-lg bg-red-500/10 text-red-500">
-                  <TrendingDown size={14} />
+              <div className="mb-1 flex items-center gap-2 sm:mb-2">
+                <div className="flex h-5 w-5 items-center justify-center rounded-md bg-red-500/10 text-red-500 sm:h-6 sm:w-6 sm:rounded-lg">
+                  <TrendingDown size={12} />
                 </div>
                 <span className="text-xs font-medium uppercase tracking-wider text-text-tertiary">
                   Hutang
                 </span>
               </div>
-              <p className="text-xl font-bold text-red-500">
+              <p className="text-lg font-bold text-red-500 sm:text-xl">
                 {formatCurrencyFull(totalDebt, currency.code)}
               </p>
-              <p className="text-xs text-text-tertiary mt-1">
+              <p className="text-xs text-text-tertiary">
                 {unpaidDebts.length} belum lunas
               </p>
             </motion.div>
 
             <motion.div
               variants={itemVariants}
-              className="rounded-xl border border-border/50 bg-secondary/30 p-4"
+              className="rounded-xl border border-border/50 bg-secondary/30 p-3 sm:p-4"
             >
-              <div className="mb-2 flex items-center gap-2">
-                <div className="flex h-6 w-6 items-center justify-center rounded-lg bg-green-500/10 text-green-500">
-                  <TrendingUp size={14} />
+              <div className="mb-1 flex items-center gap-2 sm:mb-2">
+                <div className="flex h-5 w-5 items-center justify-center rounded-md bg-green-500/10 text-green-500 sm:h-6 sm:w-6 sm:rounded-lg">
+                  <TrendingUp size={12} />
                 </div>
                 <span className="text-xs font-medium uppercase tracking-wider text-text-tertiary">
                   Piutang
                 </span>
               </div>
-              <p className="text-xl font-bold text-green-500">
+              <p className="text-lg font-bold text-green-500 sm:text-xl">
                 {formatCurrencyFull(totalCredit, currency.code)}
               </p>
-              <p className="text-xs text-text-tertiary mt-1">
+              <p className="text-xs text-text-tertiary">
                 {unreceivedCredits.length} belum diterima
               </p>
             </motion.div>

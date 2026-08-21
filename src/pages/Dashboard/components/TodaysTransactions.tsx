@@ -96,31 +96,31 @@ export function TodaysTransactions() {
                       backgroundColor: 'hsl(var(--color-bg-secondary) / 0.5)',
                       x: 4,
                     }}
-                    className={cn(
-                      'flex items-center gap-4 rounded-xl p-3 transition-all'
-                    )}
-                  >
-                    <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-secondary text-xl">
-                      {tx.icon || getCategoryIcon(tx.category)}
-                    </div>
-                    <div className="flex-1">
-                      <p className="font-medium text-text">{tx.description}</p>
-                      <p className="text-sm text-text-secondary">
-                        {tx.category}
-                      </p>
-                    </div>
-                    <div className="text-right">
-                      <p
-                        className={cn(
-                          'font-semibold',
-                          tx.amount >= 0 ? 'text-workspace' : 'text-red-500'
-                        )}
-                      >
-                        {tx.amount >= 0 ? '+' : '-'}
-                        {formatCurrencyFull(Math.abs(tx.amount), currency.code)}
-                      </p>
-                      <p className="text-xs text-text-tertiary">{tx.date}</p>
-                    </div>
+                     className={cn(
+                       'flex items-center gap-3 rounded-xl p-3 transition-all sm:gap-4'
+                     )}
+                   >
+                     <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg bg-secondary text-lg sm:h-10 sm:w-10 sm:text-xl">
+                       {tx.icon || getCategoryIcon(tx.category)}
+                     </div>
+                     <div className="flex-1 min-w-0">
+                       <p className="font-medium text-text text-sm sm:text-base truncate">{tx.description}</p>
+                       <p className="text-xs text-text-secondary">
+                         {tx.category}
+                       </p>
+                     </div>
+                     <div className="text-right flex-shrink-0">
+                       <p
+                         className={cn(
+                           'font-semibold text-sm sm:text-base',
+                           tx.amount >= 0 ? 'text-workspace' : 'text-red-500'
+                         )}
+                       >
+                         {tx.amount >= 0 ? '+' : '-'}
+                         {formatCurrencyFull(Math.abs(tx.amount), currency.code)}
+                       </p>
+                       <p className="text-xs text-text-tertiary hidden sm:block">{tx.date}</p>
+                     </div>
                   </motion.div>
                 ))}
               </motion.div>

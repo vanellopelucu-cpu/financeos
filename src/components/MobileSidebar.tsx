@@ -4,6 +4,7 @@ import {
   Bell,
   CreditCard,
   Home,
+  Landmark,
   LogOut,
   PieChart,
   Settings,
@@ -29,6 +30,7 @@ const navItems: NavItem[] = [
   { label: 'Accounts', href: '/accounts', icon: <Wallet size={20} /> },
   { label: 'Notifications', href: '/notifications', icon: <Bell size={20} /> },
   { label: 'Bills', href: '/bills', icon: <CreditCard size={20} /> },
+  { label: 'Hutang & Piutang', href: '/debts-credits', icon: <Landmark size={20} /> },
 ]
 
 const backdropVariants: Variants = {
