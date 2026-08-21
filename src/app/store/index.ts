@@ -93,6 +93,7 @@ export interface DashboardState {
   editCredit: (id: string, credit: Partial<Omit<Credit, 'id' | 'receipts'>>) => Promise<{ success: boolean; error?: string }>
   deleteCredit: (id: string) => Promise<{ success: boolean; error?: string }>
   receiveCredit: (credit: Credit, amount: number, receiptDate: string, note?: string) => Promise<{ success: boolean; error?: string }>
+  clearAllDebtsAndCredits: () => Promise<{ success: boolean; error?: string }>
 }
 
 export const useDashboardStore = create<DashboardState>()(
@@ -2146,6 +2147,56 @@ payBill: async (bill, paidDate) => {
           } catch (err) {
             console.error('receiveCredit: Unexpected error:', err)
             return { success: false, error: 'Gagal menerima piutang.' }
+          }
+        },
+
+        clearAllDebtsAndCredits: async () => {
+          const workspace = get().currentWorkspace
+
+          if (!isSupabaseConfigured) {
+            set({ debts: [], credits: [] })
+            return { success: true }
+          }
+
+          try {
+            const { data: debtBills, error: debtErr } = await supabase
+              .from('bills')
+              .select('id')
+              .eq('workspace', workspace)
+
+            if (debtErr) {
+              console.error('clearAllDebtsAndCredits: Failed to fetch bills:', debtErr.message)
+              return { success: false, error: debtErr.message }
+            }
+
+            const idsToDelete: string[] = []
+            if (debtBills) {
+              debtBills.forEach((row: any) => {
+                const provider = parseJsonSafe(row.provider)
+                if (provider.type === 'hutang' || provider.type === 'piutang') {
+                  idsToDelete.push(row.id)
+                }
+              })
+            }
+
+            if (idsToDelete.length > 0) {
+              const { error: delErr } = await supabase
+                .from('bills')
+                .delete()
+                .in('id', idsToDelete)
+                .eq('workspace', workspace)
+
+              if (delErr) {
+                console.error('clearAllDebtsAndCredits: Failed to delete:', delErr.message)
+                return { success: false, error: delErr.message }
+              }
+            }
+
+            set({ debts: [], credits: [] })
+            return { success: true }
+          } catch (err) {
+            console.error('clearAllDebtsAndCredits: Unexpected error:', err)
+            return { success: false, error: 'Gagal membersihkan data.' }
           }
         },
       }},
