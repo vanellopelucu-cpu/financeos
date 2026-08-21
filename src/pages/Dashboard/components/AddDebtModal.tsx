@@ -142,7 +142,7 @@ export function AddDebtModal({ open, onClose, debt, onSave }: AddDebtModalProps)
                   onChange={(e) => setAmount(e.target.value)}
                   required
                   min="0"
-                  step="1000"
+                  step="1"
                   className={cn(
                     'w-full rounded-xl border border-border bg-secondary/50 px-3 py-2 text-sm text-text placeholder:text-text-tertiary focus:border-workspace focus:outline-none'
                   )}
