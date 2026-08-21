@@ -94,6 +94,7 @@ export interface DashboardState {
   deleteCredit: (id: string) => Promise<{ success: boolean; error?: string }>
   receiveCredit: (credit: Credit, amount: number, receiptDate: string, note?: string) => Promise<{ success: boolean; error?: string }>
   clearAllDebtsAndCredits: () => Promise<{ success: boolean; error?: string }>
+  clearAllData: () => Promise<{ success: boolean; error?: string }>
 }
 
 export const useDashboardStore = create<DashboardState>()(
@@ -171,13 +172,11 @@ export const useDashboardStore = create<DashboardState>()(
               .order('date', { ascending: false })
               .order('id', { ascending: false })
 
-              if (error) {
-                console.warn('Failed to fetch transactions from Supabase, preserving current state:', error.message)
-                if (get().transactions.length === 0) {
-                  set({ transactions: DASHBOARD_DATA.transactions[workspace] })
-                }
-                return
-              }
+               if (error) {
+                 console.warn('Failed to fetch transactions from Supabase, preserving current state:', error.message)
+                 set({ transactions: DASHBOARD_DATA.transactions[workspace] || [] })
+                 return
+               }
 
               if (data) {
                 const mapped: Transaction[] = data.map((row: any) => ({
@@ -191,12 +190,10 @@ export const useDashboardStore = create<DashboardState>()(
                 }))
                 set({ transactions: mapped })
               }
-           } catch (err) {
-             console.warn('Error fetching transactions from Supabase, preserving current state:', err)
-             if (get().transactions.length === 0) {
-               set({ transactions: DASHBOARD_DATA.transactions[workspace] })
-             }
-           }
+            } catch (err) {
+              console.warn('Error fetching transactions from Supabase, preserving current state:', err)
+              set({ transactions: DASHBOARD_DATA.transactions[workspace] || [] })
+            }
         },
 
         fetchBills: async () => {
@@ -224,13 +221,11 @@ export const useDashboardStore = create<DashboardState>()(
                .eq('workspace', workspace)
                .order('due_date', { ascending: true })
 
-             if (error) {
-               console.warn('Failed to fetch bills from Supabase, preserving current state:', error.message)
-               if (get().upcomingBills.length === 0) {
-                 set({ upcomingBills: DASHBOARD_DATA.upcomingBills[workspace] })
-               }
-               return
-             }
+              if (error) {
+                console.warn('Failed to fetch bills from Supabase, preserving current state:', error.message)
+                set({ upcomingBills: DASHBOARD_DATA.upcomingBills[workspace] || [] })
+                return
+              }
 
               if (data) {
                 const now = new Date()
@@ -286,12 +281,10 @@ export const useDashboardStore = create<DashboardState>()(
                   })
                 set({ upcomingBills: mapped })
               }
-           } catch (err) {
-             console.warn('Error fetching bills from Supabase, preserving current state:', err)
-             if (get().upcomingBills.length === 0) {
-               set({ upcomingBills: DASHBOARD_DATA.upcomingBills[workspace] })
-             }
-           }
+            } catch (err) {
+              console.warn('Error fetching bills from Supabase, preserving current state:', err)
+              set({ upcomingBills: DASHBOARD_DATA.upcomingBills[workspace] || [] })
+            }
         },
 
         fetchMoneyPockets: async () => {
@@ -311,13 +304,11 @@ export const useDashboardStore = create<DashboardState>()(
               .eq('workspace', workspace)
               .order('created_at', { ascending: true })
 
-             if (error) {
-               console.warn('Failed to fetch money pockets from Supabase, preserving current state:', error.message)
-               if (get().moneyPockets.length === 0) {
-                 set({ moneyPockets: DASHBOARD_DATA.moneyPockets[workspace] })
-               }
-               return
-             }
+              if (error) {
+                console.warn('Failed to fetch money pockets from Supabase, preserving current state:', error.message)
+                set({ moneyPockets: DASHBOARD_DATA.moneyPockets[workspace] || [] })
+                return
+              }
 
              if (data) {
                const mapped: MoneyPocket[] = data.map((row: any) => ({
@@ -331,11 +322,9 @@ export const useDashboardStore = create<DashboardState>()(
                set({ moneyPockets: mapped })
              }
            } catch (err) {
-             console.warn('Error fetching money pockets from Supabase, preserving current state:', err)
-             if (get().moneyPockets.length === 0) {
-               set({ moneyPockets: DASHBOARD_DATA.moneyPockets[workspace] })
-             }
-           }
+              console.warn('Error fetching money pockets from Supabase, preserving current state:', err)
+              set({ moneyPockets: DASHBOARD_DATA.moneyPockets[workspace] || [] })
+            }
         },
 
         addPocket: async (pocket) => {
@@ -1156,11 +1145,9 @@ payBill: async (bill, paidDate) => {
               .order('created_at', { ascending: true })
 
              if (error) {
-               console.warn('Failed to fetch accounts from Supabase, preserving current state:', error.message)
-               if (get().accounts.length === 0) {
-                 set({ accounts: DASHBOARD_DATA.accounts[workspace] })
-               }
-               return
+                console.warn('Failed to fetch accounts from Supabase, preserving current state:', error.message)
+                set({ accounts: DASHBOARD_DATA.accounts[workspace] || [] })
+                return
              }
 
              if (data) {
@@ -1178,11 +1165,9 @@ payBill: async (bill, paidDate) => {
              }
            } catch (err) {
              console.warn('Error fetching accounts from Supabase, preserving current state:', err)
-             if (get().accounts.length === 0) {
-               set({ accounts: DASHBOARD_DATA.accounts[workspace] })
-             }
-           }
-        },
+              set({ accounts: DASHBOARD_DATA.accounts[workspace] || [] })
+            }
+         },
 
          fetchAnalytics: async () => {
            const workspace = get().currentWorkspace
@@ -1340,13 +1325,11 @@ payBill: async (bill, paidDate) => {
               .eq('workspace', workspace)
               .order('category', { ascending: true })
 
-             if (error) {
-               console.warn('Failed to fetch budgets from Supabase, preserving current state:', error.message)
-               if (get().budgets.length === 0) {
-                 set({ budgets: DASHBOARD_DATA.budgets[workspace] })
-               }
-               return
-             }
+              if (error) {
+                console.warn('Failed to fetch budgets from Supabase, preserving current state:', error.message)
+                set({ budgets: DASHBOARD_DATA.budgets[workspace] || [] })
+                return
+              }
 
              if (data) {
                const mapped: BudgetCategory[] = data.map((row: any) => ({
@@ -1358,12 +1341,10 @@ payBill: async (bill, paidDate) => {
                }))
                set({ budgets: mapped })
              }
-           } catch (err) {
-             console.warn('Error fetching budgets from Supabase, preserving current state:', err)
-              if (get().budgets.length === 0) {
-                set({ budgets: DASHBOARD_DATA.budgets[workspace] })
-              }
-          }
+            } catch (err) {
+              console.warn('Error fetching budgets from Supabase, preserving current state:', err)
+              set({ budgets: DASHBOARD_DATA.budgets[workspace] || [] })
+            }
         },
 
         fetchDebts: async () => {
@@ -1383,13 +1364,11 @@ payBill: async (bill, paidDate) => {
               .eq('workspace', workspace)
               .order('due_date', { ascending: true })
 
-            if (error) {
-              console.warn('Failed to fetch debts from Supabase, preserving current state:', error.message)
-              if (get().debts.length === 0) {
-                set({ debts: DASHBOARD_DATA.debts[workspace] || [] })
-              }
-              return
-            }
+             if (error) {
+               console.warn('Failed to fetch debts from Supabase, preserving current state:', error.message)
+               set({ debts: DASHBOARD_DATA.debts[workspace] || [] })
+               return
+             }
 
             if (data) {
               const debts: Debt[] = data
@@ -1423,12 +1402,10 @@ payBill: async (bill, paidDate) => {
                 })
               set({ debts })
             }
-          } catch (err) {
-            console.warn('Error fetching debts from Supabase, preserving current state:', err)
-            if (get().debts.length === 0) {
-              set({ debts: DASHBOARD_DATA.debts[workspace] || [] })
-            }
-          }
+           } catch (err) {
+             console.warn('Error fetching debts from Supabase, preserving current state:', err)
+             set({ debts: DASHBOARD_DATA.debts[workspace] || [] })
+           }
         },
 
         fetchCredits: async () => {
@@ -1448,13 +1425,11 @@ payBill: async (bill, paidDate) => {
               .eq('workspace', workspace)
               .order('due_date', { ascending: true })
 
-            if (error) {
-              console.warn('Failed to fetch credits from Supabase, preserving current state:', error.message)
-              if (get().credits.length === 0) {
-                set({ credits: DASHBOARD_DATA.credits[workspace] || [] })
-              }
-              return
-            }
+             if (error) {
+               console.warn('Failed to fetch credits from Supabase, preserving current state:', error.message)
+               set({ credits: DASHBOARD_DATA.credits[workspace] || [] })
+               return
+             }
 
             if (data) {
               const credits: Credit[] = data
@@ -1490,11 +1465,9 @@ payBill: async (bill, paidDate) => {
             }
           } catch (err) {
             console.warn('Error fetching credits from Supabase, preserving current state:', err)
-            if (get().credits.length === 0) {
-              set({ credits: DASHBOARD_DATA.credits[workspace] || [] })
-            }
-          }
-        },
+             set({ credits: DASHBOARD_DATA.credits[workspace] || [] })
+           }
+         },
 
         addDebt: async (debt) => {
           const workspace = get().currentWorkspace
@@ -2195,12 +2168,121 @@ payBill: async (bill, paidDate) => {
             set({ debts: [], credits: [] })
             return { success: true }
           } catch (err) {
-            console.error('clearAllDebtsAndCredits: Unexpected error:', err)
+             console.error('clearAllDebtsAndCredits: Unexpected error:', err)
+             return { success: false, error: 'Gagal membersihkan data.' }
+           }
+         },
+
+        clearAllData: async () => {
+          const workspace = get().currentWorkspace
+
+          if (!isSupabaseConfigured) {
+            set({
+              transactions: [],
+              upcomingBills: [],
+              moneyPockets: [],
+              debts: [],
+              credits: [],
+              balance: {
+                totalBalance: 0,
+                income: 0,
+                expenses: 0,
+                remaining: 0,
+                safeSpending: 0,
+                availableBalance: 0,
+              },
+              analytics: {
+                availableBalance: 0,
+                totalIncome: 0,
+                totalExpense: 0,
+                remainingBudget: 0,
+                monthlyCashflow: 0,
+                healthScore: 0,
+                savingsRate: 0,
+                categorySpending: [],
+                budgetProgress: [0, 0, 0, 0],
+              },
+              accounts: [],
+              budgets: [],
+            })
+            return { success: true }
+          }
+
+          try {
+            const { data: allBills, error: fetchErr } = await supabase
+              .from('bills')
+              .select('id, workspace, provider')
+              .eq('workspace', workspace)
+
+            if (fetchErr) {
+              console.error('clearAllData: Failed to fetch bills:', fetchErr.message)
+              return { success: false, error: fetchErr.message }
+            }
+
+            const idsToDelete: string[] = []
+            if (allBills) {
+              allBills.forEach((row: any) => {
+                const provider = parseJsonSafe(row.provider)
+                if (
+                  provider.type === 'hutang' ||
+                  provider.type === 'piutang' ||
+                  !row.provider ||
+                  row.provider === ''
+                ) {
+                  idsToDelete.push(row.id)
+                }
+              })
+            }
+
+            if (idsToDelete.length > 0) {
+              const { error: delErr } = await supabase
+                .from('bills')
+                .delete()
+                .in('id', idsToDelete)
+
+              if (delErr) {
+                console.error('clearAllData: Failed to delete bills:', delErr.message)
+                return { success: false, error: delErr.message }
+              }
+            }
+
+            set({
+              transactions: [],
+              upcomingBills: [],
+              moneyPockets: [],
+              debts: [],
+              credits: [],
+              balance: {
+                totalBalance: 0,
+                income: 0,
+                expenses: 0,
+                remaining: 0,
+                safeSpending: 0,
+                availableBalance: 0,
+              },
+              analytics: {
+                availableBalance: 0,
+                totalIncome: 0,
+                totalExpense: 0,
+                remainingBudget: 0,
+                monthlyCashflow: 0,
+                healthScore: 0,
+                savingsRate: 0,
+                categorySpending: [],
+                budgetProgress: [0, 0, 0, 0],
+              },
+              accounts: [],
+              budgets: [],
+            })
+
+            return { success: true }
+          } catch (err) {
+            console.error('clearAllData: Unexpected error:', err)
             return { success: false, error: 'Gagal membersihkan data.' }
           }
         },
       }},
-      { name: 'finance-os-storage' }
+      { name: 'finance-os-storage', version: 2, migrate: () => undefined }
     )
   )
-  )
+)
