@@ -33,7 +33,7 @@ export const Badge = forwardRef<HTMLSpanElement, BadgeProps>(
       destructive:
         'bg-error-100/50 text-error-800 dark:bg-error-900/30 dark:text-error-300',
       workspace:
-        'bg-workspace/10 text-workspace border border-workspace/30',
+        'bg-workspace/10 text-workspace border border-workspace/30 dark:bg-workspace/15 dark:border-workspace/40',
     }
 
     const sizeClasses = {

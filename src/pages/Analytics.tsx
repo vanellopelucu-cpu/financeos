@@ -159,7 +159,7 @@ function FinancialSummary() {
 
   return (
     <motion.div variants={rowVariants}>
-      <Card glass elevated className="border-0 p-0 shadow-2xl">
+      <Card glass elevated className="border-0 p-0 shadow-glass dark:shadow-glass-dark">
         <CardHeader className="border-b border-border/50 pb-4">
           <div className="flex items-center justify-between">
             <CardTitle className="text-sm font-medium uppercase tracking-wider text-text-secondary">
@@ -258,7 +258,7 @@ function CashFlowChart() {
 
   return (
     <motion.div variants={rowVariants}>
-      <Card glass elevated className="border-0 p-0 shadow-xl">
+      <Card glass elevated className="border-0 p-0 shadow-glass dark:shadow-glass-dark">
         <CardHeader className="border-b border-border/50 pb-4">
           <div className="flex items-center justify-between">
             <CardTitle className="text-sm font-medium uppercase tracking-wider text-text-secondary">
@@ -365,7 +365,7 @@ function SpendingBreakdown() {
 
   return (
     <motion.div variants={rowVariants}>
-      <Card glass elevated className="border-0 p-0 shadow-xl">
+      <Card glass elevated className="border-0 p-0 shadow-glass dark:shadow-glass-dark">
         <CardHeader className="border-b border-border/50 pb-4">
           <div className="flex items-center justify-between">
             <CardTitle className="text-sm font-medium uppercase tracking-wider text-text-secondary">
@@ -455,7 +455,7 @@ function MonthlyTrend() {
 
   return (
     <motion.div variants={rowVariants}>
-      <Card glass elevated className="border-0 p-0 shadow-xl">
+      <Card glass elevated className="border-0 p-0 shadow-glass dark:shadow-glass-dark">
         <CardHeader className="border-b border-border/50 pb-4">
           <div className="flex items-center justify-between">
             <CardTitle className="text-sm font-medium uppercase tracking-wider text-text-secondary">
@@ -570,7 +570,7 @@ function TopSpendingCategories() {
 
   return (
     <motion.div variants={rowVariants}>
-      <Card glass elevated className="border-0 p-0 shadow-xl">
+      <Card glass elevated className="border-0 p-0 shadow-glass dark:shadow-glass-dark">
         <CardHeader className="border-b border-border/50 pb-4">
           <div className="flex items-center justify-between">
             <CardTitle className="text-sm font-medium uppercase tracking-wider text-text-secondary">
@@ -698,7 +698,7 @@ function FinancialInsights() {
 
   return (
     <motion.div variants={rowVariants}>
-      <Card glass elevated className="border-0 p-0 shadow-xl">
+      <Card glass elevated className="border-0 p-0 shadow-glass dark:shadow-glass-dark">
         <CardHeader className="border-b border-border/50 pb-4">
           <div className="flex items-center justify-between">
             <CardTitle className="text-sm font-medium uppercase tracking-wider text-text-secondary">
@@ -837,7 +837,7 @@ function SmartRecommendations() {
 
   return (
     <motion.div variants={rowVariants}>
-      <Card glass elevated className="border-0 p-0 shadow-xl">
+      <Card glass elevated className="border-0 p-0 shadow-glass dark:shadow-glass-dark">
         <CardHeader className="border-b border-border/50 pb-4">
           <div className="flex items-center justify-between">
             <CardTitle className="text-sm font-medium uppercase tracking-wider text-text-secondary">

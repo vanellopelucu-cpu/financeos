@@ -107,8 +107,70 @@ export const MONTHLY_ANALYTICS_DATA: Record<
 }
 
 const ACCOUNTS_MOCK: Record<string, Account[]> = {
-  'srilanka': [],
-  'indonesia': [],
+  'srilanka': [
+    {
+      id: 'acc-srl-ntb',
+      name: 'NTB',
+      type: 'bank',
+      icon: '🏦',
+      accountNumber: '',
+      balance: 0,
+      status: 'active',
+      lastUpdated: new Date().toISOString(),
+    },
+    {
+      id: 'acc-srl-cash',
+      name: 'Cash',
+      type: 'cash',
+      icon: '💵',
+      accountNumber: '',
+      balance: 0,
+      status: 'active',
+      lastUpdated: new Date().toISOString(),
+    },
+  ],
+  'indonesia': [
+    {
+      id: 'acc-idr-bca',
+      name: 'BCA',
+      type: 'bank',
+      icon: '🏦',
+      accountNumber: '',
+      balance: 0,
+      status: 'active',
+      lastUpdated: new Date().toISOString(),
+    },
+    {
+      id: 'acc-idr-blue-bca',
+      name: 'Blue BCA',
+      type: 'bank',
+      icon: '💎',
+      accountNumber: '',
+      balance: 0,
+      status: 'active',
+      lastUpdated: new Date().toISOString(),
+    },
+    {
+      id: 'acc-idr-cash',
+      name: 'Cash',
+      type: 'cash',
+      icon: '💵',
+      accountNumber: '',
+      balance: 0,
+      status: 'active',
+      lastUpdated: new Date().toISOString(),
+    },
+    {
+      id: 'acc-idr-gopay',
+      name: 'GoPay',
+      type: 'ewallet',
+      icon: '🟢',
+      accountNumber: '',
+      balance: 0,
+      status: 'active',
+      lastUpdated: new Date().toISOString(),
+    },
+  ],
 }
 
 export { ACCOUNTS_MOCK }

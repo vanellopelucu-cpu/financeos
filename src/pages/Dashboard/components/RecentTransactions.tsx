@@ -34,8 +34,8 @@ export function RecentTransactions() {
     (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
   )
 
-  const recentTransactions = sorted.slice(0, 10)
-  const hasMore = sorted.length > 10
+  const recentTransactions = sorted.slice(0, 5)
+  const hasMore = sorted.length > 5
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString)
@@ -70,8 +70,8 @@ export function RecentTransactions() {
                 placeholder="Search transactions..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className={cn(
-                  'w-full rounded-xl border border-border bg-secondary px-10 py-2 text-sm text-text placeholder:text-text-tertiary transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-workspace focus:ring-offset-2'
+                 className={cn(
+                  'w-full rounded-xl border border-border bg-surface/50 px-10 py-2 text-sm text-text placeholder:text-text-tertiary transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-workspace focus:ring-offset-2'
                 )}
               />
             </div>
@@ -174,29 +174,29 @@ export function RecentTransactions() {
                       ease: 'easeOut',
                     }}
                      className="flex items-center justify-between rounded-xl border border-border/50 bg-secondary/30 p-3 sm:p-4"
-                   >
-                     <div className="flex items-center gap-2 sm:gap-3">
-                       <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-secondary text-base sm:h-10 sm:w-10 sm:text-lg">
-                         {tx.icon || getCategoryIcon(tx.category)}
-                       </div>
-                       <div className="min-w-0 flex-1">
-                         <span className="font-medium text-text block text-sm sm:text-base truncate">
-                           {tx.description}
-                         </span>
-                         <span className="text-xs text-text-secondary block">
-                           {tx.category}
-                         </span>
-                         <p className="text-xs text-text-tertiary hidden sm:block">
-                           {formatDate(tx.date)}
-                         </p>
-                       </div>
-                     </div>
-                     <span
-                       className={cn(
-                         'text-sm font-semibold sm:text-lg flex-shrink-0 ml-2',
-                         tx.amount >= 0 ? 'text-workspace' : 'text-red-500'
-                       )}
-                     >
+                  >
+                    <div className="flex items-center gap-2 sm:gap-3">
+                      <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-secondary text-base sm:h-10 sm:w-10 sm:text-lg">
+                        {tx.icon || getCategoryIcon(tx.category)}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <span className="font-medium text-text block text-sm sm:text-base truncate">
+                          {tx.description}
+                        </span>
+                        <span className="text-xs text-text-secondary block">
+                          {tx.category}
+                        </span>
+                        <p className="text-xs text-text-tertiary hidden sm:block">
+                          {formatDate(tx.date)}
+                        </p>
+                      </div>
+                    </div>
+                    <span
+                      className={cn(
+                        'text-sm font-semibold sm:text-lg flex-shrink-0 ml-2',
+                        tx.amount >= 0 ? 'text-workspace' : 'text-red-500'
+                      )}
+                    >
                       {tx.amount >= 0 ? '+' : '-'}
                       {formatCurrencyFull(Math.abs(tx.amount), currency.code)}
                     </span>
@@ -220,7 +220,7 @@ export function RecentTransactions() {
                   'flex items-center gap-2 text-sm font-medium text-workspace hover:underline'
                 )}
               >
-                View All Transactions
+                Lihat Semua
               </button>
             </motion.div>
           )}
@@ -229,4 +229,3 @@ export function RecentTransactions() {
     </motion.div>
   )
 }
-

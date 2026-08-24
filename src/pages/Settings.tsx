@@ -569,7 +569,7 @@ function Notifications() {
                   >
                     <motion.div
                       className={cn(
-                        'absolute top-1.5 h-5 w-5 rounded-full bg-white shadow-md transition-transform'
+                        'absolute top-1.5 h-5 w-5 rounded-full bg-white shadow-md transition-transform dark:bg-gray-200'
                       )}
                       animate={{
                         x: isEnabled ? 28 : 4,

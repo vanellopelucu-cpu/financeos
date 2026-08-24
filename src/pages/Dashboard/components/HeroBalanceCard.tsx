@@ -84,13 +84,13 @@ export function HeroBalanceCard() {
               workspace={currentWorkspace.theme === 'green'}
             />
           </div>
+            <motion.p
+              variants={fadeInUp}
+              className="text-3xl font-black tracking-tight text-text md:text-6xl"
+            >
+             {formatCurrencyFull(balance.availableBalance, currency.code)}
+           </motion.p>
            <motion.p
-             variants={fadeInUp}
-             className="text-3xl font-black tracking-tight text-text md:text-6xl"
-           >
-            {formatCurrencyFull(balance.availableBalance, currency.code)}
-          </motion.p>
-          <motion.p
               variants={fadeInUp}
               className="mt-1 text-sm text-text-secondary"
             >
@@ -153,4 +153,3 @@ export function HeroBalanceCard() {
     </motion.div>
   )
 }
-

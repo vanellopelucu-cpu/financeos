@@ -341,7 +341,7 @@ export function DebtsAndCredits() {
         >
           <Plus size={16} />
           <span className="hidden sm:inline">
-            {activeTab === 'debts' ? '+ Tambah Hutang' : '+ Tambah Piutang'}
+             {activeTab === 'debts' ? 'Add Hutang' : 'Tambah Piutang'}
           </span>
           <span className="sm:hidden">+</span>
         </motion.button>

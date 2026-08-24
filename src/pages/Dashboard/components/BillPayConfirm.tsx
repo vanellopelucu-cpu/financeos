@@ -1,5 +1,5 @@
 import { motion, type Variants } from 'framer-motion'
-import { Check, X } from 'lucide-react'
+import { Check, X, AlertCircle } from 'lucide-react'
 import { useTheme } from '../../../app/providers/ThemeContext'
 import { Card, CardContent, CardHeader, CardTitle } from '../../../components/ui/Card'
 import { cn, formatCurrencyFull } from '../../../lib/utils'
@@ -33,12 +33,13 @@ interface BillPayConfirmProps {
   onClose: () => void
   bill: Bill | null
   currency: 'LKR' | 'IDR' | 'USD'
-  onConfirm: (paidDate: string) => Promise<void>
+  onConfirm: (paidDate: string) => Promise<{ success: boolean; error?: string }>
 }
 
 export function BillPayConfirm({ open, onClose, bill, currency, onConfirm }: BillPayConfirmProps) {
   const { theme } = useTheme()
   const [isProcessing, setIsProcessing] = useState(false)
+  const [error, setError] = useState<string | null>(null)
   const [paidDate, setPaidDate] = useState(() => new Date().toISOString().split('T')[0])
 
   if (!open || !bill) return null
@@ -46,9 +47,24 @@ export function BillPayConfirm({ open, onClose, bill, currency, onConfirm }: Bil
   const today = new Date().toISOString().split('T')[0]
 
   const handleSubmit = async () => {
+    if (isProcessing) return
+
     setIsProcessing(true)
-    await onConfirm(paidDate)
-    setIsProcessing(false)
+    setError(null)
+
+    try {
+      const result = await onConfirm(paidDate)
+
+      if (result.success) {
+        onClose()
+      } else {
+        setError(result.error || 'Gagal memproses pembayaran.')
+      }
+    } catch (err) {
+      setError('Terjadi kesalahan. Silakan coba lagi.')
+    } finally {
+      setIsProcessing(false)
+    }
   }
 
   return (
@@ -57,7 +73,7 @@ export function BillPayConfirm({ open, onClose, bill, currency, onConfirm }: Bil
       initial="hidden"
       animate="visible"
       exit="exit"
-      className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/50 p-4 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/50 dark:bg-black/70 p-4 backdrop-blur-sm"
     >
       <motion.div
         variants={modalVariants}
@@ -88,16 +104,16 @@ export function BillPayConfirm({ open, onClose, bill, currency, onConfirm }: Bil
           <CardHeader className="border-b border-border/50 pb-4">
             <div className="flex items-center justify-between px-4 pt-4 sm:px-6 sm:pt-6">
               <CardTitle className="text-lg font-semibold text-text">
-                 Tandai tagihan ini sudah dibayar?
-               </CardTitle>
+                Tandai tagihan ini sudah dibayar?
+              </CardTitle>
               <motion.button
                 whileHover={{ scale: 1.1, rotate: 90 }}
                 whileTap={{ scale: 0.9 }}
                 onClick={onClose}
+                disabled={isProcessing}
                 className={cn(
                   'flex h-9 w-9 items-center justify-center rounded-lg text-text-tertiary transition-all hover:bg-secondary hover:text-text'
                 )}
-                disabled={isProcessing}
               >
                 <X size={16} />
               </motion.button>
@@ -114,11 +130,11 @@ export function BillPayConfirm({ open, onClose, bill, currency, onConfirm }: Bil
               <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-secondary text-2xl shadow-soft">
                 {bill.icon || '📄'}
               </div>
-              <div className="flex-1">
-                <p className="font-semibold text-text">{bill.title}</p>
-                <p className="text-sm text-text-secondary">{bill.provider || ''}</p>
+              <div className="flex-1 min-w-0">
+                <p className="font-semibold text-text truncate">{bill.title}</p>
+                <p className="text-sm text-text-secondary truncate">{bill.provider || ''}</p>
               </div>
-              <span className="font-semibold text-red-500">
+              <span className="font-semibold text-red-500 flex-shrink-0">
                 -{formatCurrencyFull(bill.amount, currency)}
               </span>
             </motion.div>
@@ -138,10 +154,21 @@ export function BillPayConfirm({ open, onClose, bill, currency, onConfirm }: Bil
                 onChange={(e) => setPaidDate(e.target.value)}
                 max={today}
                 className={cn(
-                  'w-full cursor-pointer rounded-xl border border-border bg-secondary/50 px-3 py-2 text-sm text-text focus:border-workspace focus:outline-none'
+                  'w-full cursor-pointer rounded-xl border border-border bg-surface/50 px-3 py-2 text-sm text-text focus:border-workspace focus:outline-none'
                 )}
               />
             </motion.div>
+
+            {error && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="mb-4 flex items-center gap-2 rounded-lg bg-error-500/10 px-3 py-2 text-sm text-error-500"
+              >
+                <AlertCircle size={16} />
+                {error}
+              </motion.div>
+            )}
 
             <motion.div
               initial={{ opacity: 0, y: 10 }}
@@ -167,11 +194,11 @@ export function BillPayConfirm({ open, onClose, bill, currency, onConfirm }: Bil
                 onClick={handleSubmit}
                 disabled={isProcessing}
                 className={cn(
-                  'flex items-center justify-center gap-2 rounded-xl border border-transparent bg-gradient-to-r from-green-500 to-emerald-600 px-5 py-2.5 text-sm font-medium text-white transition-all duration-200 hover:from-green-600 hover:to-emerald-700'
+                  'flex items-center justify-center gap-2 rounded-xl border border-transparent bg-gradient-to-r from-green-500 to-emerald-600 px-5 py-2.5 text-sm font-medium text-white transition-all duration-200 hover:from-green-600 hover:to-emerald-700 disabled:opacity-50'
                 )}
               >
-               <Check size={16} />
-                 {isProcessing ? 'Memproses...' : 'Tandai Dibayar'}
+                <Check size={16} />
+                {isProcessing ? 'Memproses...' : 'Tandai Dibayar'}
               </motion.button>
             </motion.div>
           </CardContent>
@@ -180,4 +207,3 @@ export function BillPayConfirm({ open, onClose, bill, currency, onConfirm }: Bil
     </motion.div>
   )
 }
-

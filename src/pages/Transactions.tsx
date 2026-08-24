@@ -9,7 +9,6 @@ import {
   TrendingDown,
   TrendingUp,
   Trash2,
-  Plus,
 } from 'lucide-react'
 import { useWorkspace } from '../app/providers/WorkspaceContext'
 import { useDashboardStore } from '../app/store'
@@ -38,7 +37,7 @@ const categoryColors: Record<string, string> = {
   Shopping: 'bg-pink-500/10 text-pink-500 border-pink-500/30',
   Entertainment: 'bg-purple-500/10 text-purple-500 border-purple-500/30',
   'Bills & Utilities': 'bg-amber-500/10 text-amber-500 border-amber-500/30',
-  Healthcare: 'bg-red-500/10 text-red-500 border-red-500/30',
+  Healthcare: 'bg-red-500/10 text-red-500 border-red-500/30 dark:bg-red-500/20 dark:text-red-400 dark:border-red-500/40',
   Education: 'bg-indigo-500/10 text-indigo-500 border-indigo-500/30',
   Salary: 'bg-sri-500/10 text-sri-500 border-sri-500/30',
   Investment: 'bg-emerald-500/10 text-emerald-500 border-emerald-500/30',
@@ -197,29 +196,16 @@ export function Transactions() {
       className="flex flex-col gap-6"
     >
       {/* Page Header */}
-      <motion.div variants={itemVariants} className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex items-center gap-3">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-workspace/10 text-workspace">
-            <CreditCard size={16} />
-          </div>
-          <h1 className="text-3xl font-bold tracking-tight text-text">
-            Transactions
-          </h1>
-        </div>
-
-        <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          onClick={() => setShowAddTransaction(true)}
-          className={cn(
-            'w-full sm:w-auto flex items-center justify-center gap-1.5 rounded-xl bg-workspace px-3 py-2.5 text-sm font-medium text-white transition-all duration-300 hover:bg-workspace-hover sm:gap-2 sm:px-4 sm:py-2'
-          )}
-        >
-          <Plus size={16} />
-          <span className="hidden sm:inline">+ Tambah Catatan</span>
-          <span className="sm:hidden">+</span>
-        </motion.button>
-      </motion.div>
+       <motion.div variants={itemVariants} className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+         <div className="flex items-center gap-3">
+           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-workspace/10 text-workspace">
+             <CreditCard size={16} />
+           </div>
+           <h1 className="text-3xl font-bold tracking-tight text-text">
+             Transactions
+           </h1>
+         </div>
+       </motion.div>
 
       {/* Summary Cards */}
       <motion.div
@@ -244,14 +230,14 @@ export function Transactions() {
 
         <Card glass className="border-0 p-4 shadow-xl">
           <div className="flex items-center gap-3">
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-red-500/10 text-red-500">
+            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-red-500/10 text-red-500 dark:bg-red-500/20 dark:text-red-400">
               <TrendingDown size={18} />
             </div>
             <div>
               <p className="text-xs font-medium uppercase tracking-wider text-text-tertiary">
                 Total Expenses
               </p>
-              <p className="text-xl font-bold text-red-500">
+              <p className="text-xl font-bold text-red-500 dark:text-red-400">
                 -{formatCurrencyFull(Math.abs(totalExpenses), currency.code)}
               </p>
             </div>
@@ -265,7 +251,7 @@ export function Transactions() {
                 'flex h-9 w-9 items-center justify-center rounded-lg',
                 netChange >= 0
                   ? 'bg-workspace/10 text-workspace'
-                  : 'bg-red-500/10 text-red-500'
+                  : 'bg-red-500/10 text-red-500 dark:bg-red-500/20 dark:text-red-400'
               )}
             >
               <CreditCard size={18} />
@@ -277,7 +263,7 @@ export function Transactions() {
               <p
                 className={cn(
                   'text-xl font-bold',
-                  netChange >= 0 ? 'text-workspace' : 'text-red-500'
+                  netChange >= 0 ? 'text-workspace' : 'text-red-500 dark:text-red-400'
                 )}
               >
                 {netChange >= 0 ? '+' : '-'}
@@ -497,7 +483,7 @@ export function Transactions() {
                             <span
                               className={cn(
                                 'font-semibold',
-                                isIncome ? 'text-workspace' : 'text-red-500'
+                                isIncome ? 'text-workspace' : 'text-red-500 dark:text-red-400'
                               )}
                             >
                               {isIncome ? '+' : '-'}
@@ -562,7 +548,7 @@ export function Transactions() {
                         <span
                           className={cn(
                             'text-lg font-semibold',
-                            isIncome ? 'text-workspace' : 'text-red-500'
+                            isIncome ? 'text-workspace' : 'text-red-500 dark:text-red-400'
                           )}
                         >
                           {isIncome ? '+' : '-'}

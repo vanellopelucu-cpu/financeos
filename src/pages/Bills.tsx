@@ -28,9 +28,9 @@ const itemVariants: Variants = {
 }
 
 const statusColors: Record<string, string> = {
-  unpaid: 'bg-warning-500/10 text-warning-500 border-warning-500/30',
-  paid: 'bg-success-500/10 text-success-500 border-success-500/30',
-  overdue: 'bg-red-500/10 text-red-500 border-red-500/30',
+  unpaid: 'bg-warning-500/10 text-warning-500 border-warning-500/30 dark:bg-warning-900/30 dark:text-warning-300 dark:border-warning-500/30',
+  paid: 'bg-success-500/10 text-success-500 border-success-500/30 dark:bg-success-900/30 dark:text-success-300 dark:border-success-500/30',
+  overdue: 'bg-red-500/10 text-red-500 border-red-500/30 dark:bg-red-900/30 dark:text-red-300 dark:border-red-500/30',
 }
 
 const BILL_CATEGORIES = [
@@ -113,24 +113,16 @@ export function Bills() {
     }
   }
 
-   const handlePayConfirm = async (paidDate: string) => {
-    if (!payingBill) return
-    const result = await payBill(payingBill, paidDate)
-    if (result.success) {
-      setShowPayModal(false)
-      setPayingBill(null)
-    } else {
-      useNotificationStore.getState().addNotification({
-        type: 'bill',
-        title: 'Gagal Membayar Tagihan',
-        description: result.error || 'Gagal membayar tagihan. Silakan coba lagi.',
-        priority: 'high',
-        read: false,
-        icon: '💡',
-        timestamp: new Date().toISOString(),
-      })
+    const handlePayConfirm = async (paidDate: string): Promise<{ success: boolean; error?: string }> => {
+      if (!payingBill) return { success: false, error: 'No bill selected' }
+      const result = await payBill(payingBill, paidDate)
+      if (result.success) {
+        setShowPayModal(false)
+        setPayingBill(null)
+        await fetchBills()
+      }
+      return result
     }
-  }
 
   const handleUnpayConfirm = async () => {
     if (!unpayingBill) return
@@ -296,7 +288,7 @@ export function Bills() {
                             <div className="flex flex-col">
                               <span>{getDueDateLabel(bill.dueDate)}</span>
                               {isOverdue && !isPaid && (
-                                <span className="text-xs text-red-500 font-medium">
+                                <span className="text-xs text-red-500 dark:text-red-300 font-medium">
                                   Jatuh tempo lewat
                                 </span>
                               )}
@@ -315,7 +307,7 @@ export function Bills() {
                             <span
                               className={cn(
                                 'font-semibold',
-                                isIncome ? 'text-sri-500' : 'text-red-500'
+                                isIncome ? 'text-sri-500 dark:text-sri-400' : 'text-red-500 dark:text-red-300'
                               )}
                             >
                               {isIncome ? '+' : '-'}
@@ -333,7 +325,7 @@ export function Bills() {
                                     setShowPayModal(true)
                                   }}
                                   className={cn(
-                                    'flex h-9 w-9 items-center justify-center rounded-lg bg-success-500/10 text-success-500 transition-colors hover:bg-success-500/20'
+                                    'flex h-9 w-9 items-center justify-center rounded-lg bg-success-500/10 text-success-500 transition-colors hover:bg-success-500/20 dark:bg-success-900/30 dark:text-success-300 dark:hover:bg-success-900/40'
                                   )}
                                   aria-label={`Mark ${bill.title} as paid`}
                                   title="Tandai Dibayar"
@@ -350,7 +342,7 @@ export function Bills() {
                                     setShowUnpayModal(true)
                                   }}
                                   className={cn(
-                                    'flex h-9 w-9 items-center justify-center rounded-lg bg-warning-500/10 text-warning-500 transition-colors hover:bg-warning-500/20'
+                                    'flex h-9 w-9 items-center justify-center rounded-lg bg-warning-500/10 text-warning-500 transition-colors hover:bg-warning-500/20 dark:bg-warning-900/30 dark:text-warning-300 dark:hover:bg-warning-900/40'
                                   )}
                                   aria-label={`Mark ${bill.title} as unpaid`}
                                   title="Tandai Belum Dibayar"
@@ -429,7 +421,7 @@ export function Bills() {
                                   {bill.status === 'paid' ? 'LUNAS' : bill.status === 'overdue' ? 'TERLAMBAT' : 'BELUM DIBAYAR'}
                                 </Badge>
                                 {isOverdue && !isPaid && (
-                                  <span className="text-xs text-red-500 font-medium">Jatuh tempo lewat</span>
+                                  <span className="text-xs text-red-500 dark:text-red-300 font-medium">Jatuh tempo lewat</span>
                                 )}
                               </div>
                               <p className="text-xs text-text-tertiary mt-1">{getDueDateLabel(bill.dueDate)}</p>
@@ -437,7 +429,7 @@ export function Bills() {
                           </div>
                           <span className={cn(
                             'text-right font-semibold',
-                            isIncome ? 'text-sri-500' : 'text-red-500'
+                            isIncome ? 'text-sri-500 dark:text-sri-400' : 'text-red-500 dark:text-red-300'
                           )}>
                             {isIncome ? '+' : '-'}
                             {formatCurrencyFull(Math.abs(bill.amount), currency.code)}
@@ -453,7 +445,7 @@ export function Bills() {
                                 setShowPayModal(true)
                               }}
                               className={cn(
-                                'flex h-9 w-9 items-center justify-center rounded-lg bg-success-500/10 text-success-500 transition-colors hover:bg-success-500/20'
+                                'flex h-9 w-9 items-center justify-center rounded-lg bg-success-500/10 text-success-500 transition-colors hover:bg-success-500/20 dark:bg-success-900/30 dark:text-success-300 dark:hover:bg-success-900/40'
                               )}
                               aria-label={`Mark ${bill.title} as paid`}
                               title="Bayar"
@@ -470,7 +462,7 @@ export function Bills() {
                                 setShowUnpayModal(true)
                               }}
                               className={cn(
-                                'flex h-9 w-9 items-center justify-center rounded-lg bg-warning-500/10 text-warning-500 transition-colors hover:bg-warning-500/20'
+                                'flex h-9 w-9 items-center justify-center rounded-lg bg-warning-500/10 text-warning-500 transition-colors hover:bg-warning-500/20 dark:bg-warning-900/30 dark:text-warning-300 dark:hover:bg-warning-900/40'
                               )}
                               aria-label={`Mark ${bill.title} as unpaid`}
                               title="Tandai Belum Dibayar"

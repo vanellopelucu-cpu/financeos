@@ -70,7 +70,7 @@ export function EditBillModal({ open, onClose, bill, categories, onSave }: EditB
       initial="hidden"
       animate="visible"
       exit="exit"
-      className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/50 p-4 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/50 dark:bg-black/70 p-4 backdrop-blur-sm"
     >
       <motion.div
         variants={modalVariants}
@@ -126,7 +126,7 @@ export function EditBillModal({ open, onClose, bill, categories, onSave }: EditB
                   onChange={(e) => setTitle(e.target.value)}
                   required
                   className={cn(
-                    'w-full rounded-xl border border-border bg-secondary/50 px-3 py-2 text-sm text-text placeholder:text-text-tertiary focus:border-workspace focus:outline-none'
+                    'w-full rounded-xl border border-border bg-surface/50 px-3 py-2 text-sm text-text placeholder:text-text-tertiary focus:border-workspace focus:outline-none'
                   )}
                   placeholder="e.g. Electricity Bill"
                 />
@@ -144,7 +144,7 @@ export function EditBillModal({ open, onClose, bill, categories, onSave }: EditB
                     required
                     min="0"
                     className={cn(
-                      'w-full rounded-xl border border-border bg-secondary/50 px-3 py-2 text-sm text-text placeholder:text-text-tertiary focus:border-workspace focus:outline-none'
+                      'w-full rounded-xl border border-border bg-surface/50 px-3 py-2 text-sm text-text placeholder:text-text-tertiary focus:border-workspace focus:outline-none'
                     )}
                     placeholder="0"
                   />
@@ -160,7 +160,7 @@ export function EditBillModal({ open, onClose, bill, categories, onSave }: EditB
                     required
                     min={today}
                     className={cn(
-                      'w-full rounded-xl border border-border bg-secondary/50 px-3 py-2 text-sm text-text placeholder:text-text-tertiary focus:border-workspace focus:outline-none'
+                      'w-full rounded-xl border border-border bg-surface/50 px-3 py-2 text-sm text-text placeholder:text-text-tertiary focus:border-workspace focus:outline-none'
                     )}
                   />
                 </div>

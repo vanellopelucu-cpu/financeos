@@ -371,14 +371,14 @@ function RecentAccountActivity() {
                 </div>
                 <div className="flex flex-shrink-0 items-center justify-end gap-2">
                   <span
-                    className={cn(
-                      'font-semibold',
-                      activity.type === 'deposit'
-                        ? 'text-sri-500'
-                        : activity.type === 'withdrawal'
-                          ? 'text-red-500'
-                          : 'text-workspace'
-                    )}
+                     className={cn(
+                       'font-semibold',
+                       activity.type === 'deposit'
+                         ? 'text-sri-500'
+                         : activity.type === 'withdrawal'
+                           ? 'text-error-500 dark:text-error-400'
+                           : 'text-workspace'
+                     )}
                   >
                     {activity.type === 'deposit' ? '+' : activity.type === 'withdrawal' ? '-' : ''}
                     {formatCurrencyFull(activity.amount, currency.code)}
@@ -509,7 +509,7 @@ function FinancialHealth() {
               className="flex items-center justify-between rounded-xl border border-border/50 bg-secondary/50 p-4"
             >
               <div className="flex items-center gap-4">
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-amber-500/10 text-amber-500">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-warning-500/10 dark:bg-warning-500/20 text-warning-500 dark:text-warning-400">
                   <CreditCard size={20} />
                 </div>
                 <div>

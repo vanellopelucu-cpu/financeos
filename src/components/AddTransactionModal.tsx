@@ -3,6 +3,7 @@ import { X, Plus } from 'lucide-react'
 import { useState } from 'react'
 import { useTheme } from '../app/providers/ThemeContext'
 import { useWorkspace } from '../app/providers/WorkspaceContext'
+import { useDashboardStore } from '../app/store'
 import { WORKSPACES } from '../lib/data'
 import { Card, CardContent, CardHeader } from '../components/ui/Card'
 import { cn, formatCurrencyFull, getCategoryIcon } from '../lib/utils'
@@ -56,6 +57,7 @@ interface AddTransactionModalProps {
 export function AddTransactionModal({ open, onClose, onSave }: AddTransactionModalProps) {
   const { theme } = useTheme()
   const { currentWorkspace } = useWorkspace()
+  const { accounts } = useDashboardStore()
   const [type, setType] = useState<'income' | 'expense'>('expense')
   const [description, setDescription] = useState('')
   const [amount, setAmount] = useState('')
@@ -63,6 +65,7 @@ export function AddTransactionModal({ open, onClose, onSave }: AddTransactionMod
   const [category, setCategory] = useState('General')
   const [notes, setNotes] = useState('')
   const [workspace, setWorkspace] = useState<WorkspaceId>(currentWorkspace.id)
+  const [accountId, setAccountId] = useState<string>(accounts[0]?.id || '')
 
   if (!open) return null
 
@@ -81,6 +84,7 @@ export function AddTransactionModal({ open, onClose, onSave }: AddTransactionMod
       date,
       amount: signedAmount,
       icon: getCategoryIcon(category),
+      accountId: accountId || undefined,
     })
   }
 
@@ -93,7 +97,7 @@ export function AddTransactionModal({ open, onClose, onSave }: AddTransactionMod
       initial="hidden"
       animate="visible"
       exit="exit"
-      className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/50 p-4 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/50 p-4 backdrop-blur-sm dark:bg-black/70"
     >
       <motion.div
         variants={modalVariants}
@@ -121,15 +125,22 @@ export function AddTransactionModal({ open, onClose, onSave }: AddTransactionMod
             />
           </div>
 
-          <CardHeader className="border-b border-border/50 pb-4">
+          <CardHeader className={cn(
+            'border-b pb-4',
+            isDark ? 'border-border/30' : 'border-border/50'
+          )}>
             <div className="flex items-center justify-between px-4 pt-4 sm:px-6 sm:pt-6">
-              <h2 className="text-lg font-semibold text-text">Tambah Catatan</h2>
+              <h2 className={cn(
+                'text-lg font-semibold',
+                isDark ? 'text-text' : 'text-text'
+              )}>Tambah Catatan</h2>
               <motion.button
                 whileHover={{ scale: 1.1, rotate: 90 }}
                 whileTap={{ scale: 0.9 }}
                 onClick={onClose}
                 className={cn(
-                  'flex h-9 w-9 items-center justify-center rounded-lg text-text-tertiary transition-all hover:bg-secondary hover:text-text'
+                  'flex h-9 w-9 items-center justify-center rounded-lg transition-all',
+                  isDark ? 'text-text-secondary hover:bg-white/10 hover:text-text' : 'text-text-tertiary hover:bg-secondary hover:text-text'
                 )}
               >
                 <X size={16} />
@@ -140,7 +151,10 @@ export function AddTransactionModal({ open, onClose, onSave }: AddTransactionMod
           <CardContent className="p-4 sm:p-6">
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-text-secondary mb-1">
+                <label className={cn(
+                  'block text-sm font-medium mb-1',
+                  isDark ? 'text-text-secondary' : 'text-text-secondary'
+                )}>
                   Jenis
                 </label>
                 <div className="flex gap-4">
@@ -150,9 +164,15 @@ export function AddTransactionModal({ open, onClose, onSave }: AddTransactionMod
                       name="type"
                       checked={type === 'income'}
                       onChange={() => setType('income')}
-                      className="h-4 w-4 cursor-pointer text-workspace focus:ring-workspace"
+                      className={cn(
+                        'h-4 w-4 cursor-pointer focus:ring-workspace',
+                        isDark ? 'accent-workspace' : 'text-workspace'
+                      )}
                     />
-                    <span className="text-sm text-text">Pemasukan</span>
+                    <span className={cn(
+                      'text-sm',
+                      isDark ? 'text-text' : 'text-text'
+                    )}>Pemasukan</span>
                   </label>
                   <label className="flex items-center gap-2 cursor-pointer">
                     <input
@@ -160,15 +180,24 @@ export function AddTransactionModal({ open, onClose, onSave }: AddTransactionMod
                       name="type"
                       checked={type === 'expense'}
                       onChange={() => setType('expense')}
-                      className="h-4 w-4 cursor-pointer text-workspace focus:ring-workspace"
+                      className={cn(
+                        'h-4 w-4 cursor-pointer focus:ring-workspace',
+                        isDark ? 'accent-workspace' : 'text-workspace'
+                      )}
                     />
-                    <span className="text-sm text-text">Pengeluaran</span>
+                    <span className={cn(
+                      'text-sm',
+                      isDark ? 'text-text' : 'text-text'
+                    )}>Pengeluaran</span>
                   </label>
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-text-secondary mb-1">
+                <label className={cn(
+                  'block text-sm font-medium mb-1',
+                  isDark ? 'text-text-secondary' : 'text-text-secondary'
+                )}>
                   Deskripsi
                 </label>
                 <input
@@ -177,7 +206,10 @@ export function AddTransactionModal({ open, onClose, onSave }: AddTransactionMod
                   onChange={(e) => setDescription(e.target.value)}
                   required
                   className={cn(
-                    'w-full rounded-xl border border-border bg-secondary/50 px-3 py-2 text-sm text-text placeholder:text-text-tertiary focus:border-workspace focus:outline-none'
+                    'w-full rounded-xl border px-3 py-2 text-sm focus:outline-none',
+                    isDark
+                      ? 'border-border bg-surface/50 text-text placeholder:text-text-tertiary focus:border-workspace'
+                      : 'border-border bg-secondary/50 text-text placeholder:text-text-tertiary focus:border-workspace'
                   )}
                   placeholder="e.g. Gaji, Makan, Belanja"
                 />
@@ -185,7 +217,10 @@ export function AddTransactionModal({ open, onClose, onSave }: AddTransactionMod
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-text-secondary mb-1">
+                  <label className={cn(
+                    'block text-sm font-medium mb-1',
+                    isDark ? 'text-text-secondary' : 'text-text-secondary'
+                  )}>
                     Nominal
                   </label>
                   <input
@@ -196,18 +231,27 @@ export function AddTransactionModal({ open, onClose, onSave }: AddTransactionMod
                     min="0"
                     step="1"
                     className={cn(
-                      'w-full rounded-xl border border-border bg-secondary/50 px-3 py-2 text-sm text-text placeholder:text-text-tertiary focus:border-workspace focus:outline-none'
+                      'w-full rounded-xl border px-3 py-2 text-sm focus:outline-none',
+                      isDark
+                        ? 'border-border bg-surface/50 text-text placeholder:text-text-tertiary focus:border-workspace'
+                        : 'border-border bg-secondary/50 text-text placeholder:text-text-tertiary focus:border-workspace'
                     )}
                     placeholder="0"
                   />
                   {amount && !isNaN(parseFloat(amount)) && parseFloat(amount) > 0 && (
-                    <p className="mt-1 text-xs text-text-secondary">
+                    <p className={cn(
+                      'mt-1 text-xs',
+                      isDark ? 'text-text-tertiary' : 'text-text-secondary'
+                    )}>
                       Preview: {formatCurrencyFull(type === 'income' ? parseFloat(amount) : -parseFloat(amount), currentWorkspace.currency.code)}
                     </p>
                   )}
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-text-secondary mb-1">
+                  <label className={cn(
+                    'block text-sm font-medium mb-1',
+                    isDark ? 'text-text-secondary' : 'text-text-secondary'
+                  )}>
                     Tanggal
                   </label>
                   <input
@@ -217,21 +261,30 @@ export function AddTransactionModal({ open, onClose, onSave }: AddTransactionMod
                     required
                     max={today}
                     className={cn(
-                      'w-full rounded-xl border border-border bg-secondary/50 px-3 py-2 text-sm text-text placeholder:text-text-tertiary focus:border-workspace focus:outline-none'
+                      'w-full rounded-xl border px-3 py-2 text-sm focus:outline-none',
+                      isDark
+                        ? 'border-border bg-surface/50 text-text placeholder:text-text-tertiary focus:border-workspace'
+                        : 'border-border bg-secondary/50 text-text placeholder:text-text-tertiary focus:border-workspace'
                     )}
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-text-secondary mb-1">
+                <label className={cn(
+                  'block text-sm font-medium mb-1',
+                  isDark ? 'text-text-secondary' : 'text-text-secondary'
+                )}>
                   Kategori
                 </label>
                 <select
                   value={category}
                   onChange={(e) => setCategory(e.target.value)}
                   className={cn(
-                    'w-full cursor-pointer rounded-xl border border-border bg-secondary/50 px-3 py-2 text-sm text-text focus:border-workspace focus:outline-none'
+                    'w-full cursor-pointer rounded-xl border px-3 py-2 text-sm focus:outline-none',
+                    isDark
+                      ? 'border-border bg-surface/50 text-text focus:border-workspace'
+                      : 'border-border bg-secondary/50 text-text focus:border-workspace'
                   )}
                 >
                   {TRANSACTION_CATEGORIES.map((cat) => (
@@ -243,7 +296,10 @@ export function AddTransactionModal({ open, onClose, onSave }: AddTransactionMod
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-text-secondary mb-1">
+                <label className={cn(
+                  'block text-sm font-medium mb-1',
+                  isDark ? 'text-text-secondary' : 'text-text-secondary'
+                )}>
                   Catatan (opsional)
                 </label>
                 <textarea
@@ -251,21 +307,30 @@ export function AddTransactionModal({ open, onClose, onSave }: AddTransactionMod
                   onChange={(e) => setNotes(e.target.value)}
                   rows={3}
                   className={cn(
-                    'w-full rounded-xl border border-border bg-secondary/50 px-3 py-2 text-sm text-text placeholder:text-text-tertiary focus:border-workspace focus:outline-none resize-none'
+                    'w-full rounded-xl border px-3 py-2 text-sm focus:outline-none resize-none',
+                    isDark
+                      ? 'border-border bg-surface/50 text-text placeholder:text-text-tertiary focus:border-workspace'
+                      : 'border-border bg-secondary/50 text-text placeholder:text-text-tertiary focus:border-workspace'
                   )}
                   placeholder="Tambahkan catatan..."
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-text-secondary mb-1">
+                <label className={cn(
+                  'block text-sm font-medium mb-1',
+                  isDark ? 'text-text-secondary' : 'text-text-secondary'
+                )}>
                   Workspace
                 </label>
                 <select
                   value={workspace}
                   onChange={(e) => setWorkspace(e.target.value as WorkspaceId)}
                   className={cn(
-                    'w-full cursor-pointer rounded-xl border border-border bg-secondary/50 px-3 py-2 text-sm text-text focus:border-workspace focus:outline-none'
+                    'w-full cursor-pointer rounded-xl border px-3 py-2 text-sm focus:outline-none',
+                    isDark
+                      ? 'border-border bg-surface/50 text-text focus:border-workspace'
+                      : 'border-border bg-secondary/50 text-text focus:border-workspace'
                   )}
                 >
                   {WORKSPACES.map((ws) => (
@@ -276,12 +341,46 @@ export function AddTransactionModal({ open, onClose, onSave }: AddTransactionMod
                 </select>
               </div>
 
-              <div className="flex items-center justify-end gap-3 border-t border-border/50 pt-4">
+              {accounts.length > 0 && (
+                <div>
+                  <label className={cn(
+                    'block text-sm font-medium mb-1',
+                    isDark ? 'text-text-secondary' : 'text-text-secondary'
+                  )}>
+                    Akun
+                  </label>
+                  <select
+                    value={accountId}
+                    onChange={(e) => setAccountId(e.target.value)}
+                    className={cn(
+                      'w-full cursor-pointer rounded-xl border px-3 py-2 text-sm focus:outline-none',
+                      isDark
+                        ? 'border-border bg-surface/50 text-text focus:border-workspace'
+                        : 'border-border bg-secondary/50 text-text focus:border-workspace'
+                    )}
+                  >
+                    <option value="">Pilih Akun</option>
+                    {accounts.map((acc) => (
+                      <option key={acc.id} value={acc.id}>
+                        {acc.icon} {acc.name} ({formatCurrencyFull(acc.balance, currentWorkspace.currency.code)})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
+
+              <div className={cn(
+                'flex items-center justify-end gap-3 pt-4',
+                isDark ? 'border-t border-border/30' : 'border-t border-border/50'
+              )}>
                 <button
                   type="button"
                   onClick={onClose}
                   className={cn(
-                    'rounded-xl border border-border px-5 py-2 text-sm font-medium text-text-secondary transition-all hover:bg-border'
+                    'rounded-xl border px-5 py-2 text-sm font-medium transition-all',
+                    isDark
+                      ? 'border-border text-text-secondary hover:bg-white/10'
+                      : 'border-border text-text-secondary hover:bg-border'
                   )}
                 >
                   Batal
@@ -290,7 +389,10 @@ export function AddTransactionModal({ open, onClose, onSave }: AddTransactionMod
                   type="submit"
                   disabled={!description.trim() || !amount}
                   className={cn(
-                    'rounded-xl border border-transparent bg-gradient-to-r from-purple-500 to-indigo-600 px-5 py-2 text-sm font-medium text-white transition-all hover:from-purple-600 hover:to-indigo-700 disabled:opacity-50 flex items-center gap-2'
+                    'flex items-center gap-2 rounded-xl border border-transparent px-5 py-2 text-sm font-medium text-white transition-all hover:from-purple-600 hover:to-indigo-700 disabled:opacity-50',
+                    isDark
+                      ? 'bg-gradient-to-r from-purple-500 to-indigo-600'
+                      : 'bg-gradient-to-r from-purple-500 to-indigo-600'
                   )}
                 >
                   <Plus size={14} />

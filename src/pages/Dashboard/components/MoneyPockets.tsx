@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion'
-import { Pencil, Plus, Trash2, TrendingDown, TrendingUp, Wallet } from 'lucide-react'
+import { Pencil, Trash2, TrendingDown, TrendingUp, Wallet } from 'lucide-react'
 import { useState } from 'react'
 import { useWorkspace } from '../../../app/providers/WorkspaceContext'
 import { useDashboardStore } from '../../../app/store'
@@ -53,6 +53,7 @@ export function MoneyPockets() {
     }
   })
   const pockets = [...defaultPocketsMerged, ...(moneyPockets || []).filter((p) => !DEFAULT_POCKETS.some((dp) => dp.name === p.name))]
+  const filteredPockets = currency.code === 'LKR' ? [] : pockets
 
   const handleAddSave = async (pocket: {
     name: string
@@ -102,6 +103,7 @@ export function MoneyPockets() {
       if (result.success) {
         setShowEditModal(false)
         setEditingPocket(null)
+        setDismissedDefaults((prev) => new Set(prev).add(id))
         await fetchMoneyPockets()
       }
       return
@@ -118,21 +120,16 @@ export function MoneyPockets() {
     }
   }
 
-  const handleDeleteConfirm = async (id: string) => {
-    const isDefaultId = id.startsWith('pocket-')
-
+  const handleDeleteConfirm = async () => {
+    if (!deletingPocket) return
+    const isDefaultId = deletingPocket.id.startsWith('pocket-')
     if (isDefaultId) {
+      setDismissedDefaults((prev) => new Set(prev).add(deletingPocket.id))
       setShowDeleteModal(false)
       setDeletingPocket(null)
-      setDismissedDefaults((prev) => {
-        const next = new Set(prev)
-        next.add(id)
-        return next
-      })
       return
     }
-
-    const result = await deletePocket(id)
+    const result = await deletePocket(deletingPocket.id)
     if (result.success) {
       setShowDeleteModal(false)
       setDeletingPocket(null)
@@ -140,14 +137,20 @@ export function MoneyPockets() {
     }
   }
 
-  const handleEditClick = (pocket: MoneyPocket) => {
-    setEditingPocket(pocket)
-    setShowEditModal(true)
+  const handleTransferConfirm = async (amount: number) => {
+    if (!transferPocket) return
+    if (transferMode === 'isi') {
+      await addToPocket(transferPocket, amount)
+    } else {
+      await withdrawFromPocket(transferPocket, amount)
+    }
+    setShowTransferModal(false)
+    setTransferPocket(null)
   }
 
-  const handleDeleteClick = (pocket: MoneyPocket) => {
-    setDeletingPocket(pocket)
-    setShowDeleteModal(true)
+  const getProgress = (pocket: MoneyPocket) => {
+    if (pocket.targetAmount <= 0) return 0
+    return Math.min(100, (pocket.currentAmount / pocket.targetAmount) * 100)
   }
 
   const handleIsiClick = (pocket: MoneyPocket) => {
@@ -162,28 +165,14 @@ export function MoneyPockets() {
     setShowTransferModal(true)
   }
 
-  const handleTransferConfirm = async (amount: number) => {
-    if (!transferPocket) return { success: false, error: 'No pocket selected' }
-
-    let result: { success: boolean; error?: string }
-    if (transferMode === 'isi') {
-      result = await addToPocket(transferPocket, amount)
-    } else {
-      result = await withdrawFromPocket(transferPocket, amount)
-    }
-
-    if (result.success) {
-      setShowTransferModal(false)
-      setTransferPocket(null)
-      await fetchMoneyPockets()
-    }
-
-    return result
+  const handleEditClick = (pocket: MoneyPocket) => {
+    setEditingPocket(pocket)
+    setShowEditModal(true)
   }
 
-  const getProgress = (pocket: MoneyPocket) => {
-    if (pocket.targetAmount <= 0) return 0
-    return Math.min(100, (pocket.currentAmount / pocket.targetAmount) * 100)
+  const handleDeleteClick = (pocket: MoneyPocket) => {
+    setDeletingPocket(pocket)
+    setShowDeleteModal(true)
   }
 
   return (
@@ -205,28 +194,9 @@ export function MoneyPockets() {
           </div>
         </CardHeader>
 
-        <CardContent>
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-sm font-medium text-text-secondary">
-              {pockets.length} {pockets.length === 1 ? 'pocket' : 'pockets'}
-            </h3>
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              onClick={() => setShowAddModal(true)}
-              className={cn(
-                'w-full sm:w-auto flex items-center justify-center gap-1.5 rounded-xl border border-transparent bg-gradient-to-r from-purple-500 to-indigo-600 px-4 py-2.5 text-sm font-medium text-white transition-all hover:from-purple-600 hover:to-indigo-700 sm:gap-2 sm:px-4 sm:py-2'
-              )}
-            >
-              <Plus size={16} />
-              Add Pocket
-            </motion.button>
-          </div>
-
+        <CardContent className="p-4 sm:p-6">
           <motion.div
-            className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4"
-            initial="hidden"
-            animate="visible"
+            className="grid grid-cols-2 gap-4 sm:grid-cols-2 lg:grid-cols-4"
             variants={{
               visible: {
                 transition: {
@@ -235,139 +205,141 @@ export function MoneyPockets() {
                 },
               },
             }}
+            initial="hidden"
+            animate="visible"
           >
-            {pockets.map((pocket) => (
+            {filteredPockets.map((pocket) => (
               <motion.div
                 key={pocket.id}
                 variants={cardVariants}
                 whileHover={{ y: -4, scale: 1.02 }}
-                 className={cn(
-                   'group relative overflow-hidden rounded-2xl border border-border/50 bg-secondary/30 p-4 transition-all duration-300 sm:p-5'
-                 )}
-               >
-                 <div className="absolute inset-0 -z-10">
-                   <div
-                     className={cn(
-                       'absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500',
-                       currentWorkspace.theme === 'green'
-                         ? 'bg-gradient-to-br from-sri-500/5 to-transparent'
-                         : 'bg-gradient-to-br from-indo-500/5 to-transparent'
-                     )}
-                   />
-                 </div>
+                className={cn(
+                  'group relative overflow-hidden rounded-2xl border border-border/50 bg-secondary/30 p-4 transition-all duration-300 sm:p-5'
+                )}
+              >
+                <div className="absolute inset-0 -z-10">
+                  <div
+                    className={cn(
+                      'absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500',
+                      currentWorkspace.theme === 'green'
+                        ? 'bg-gradient-to-br from-sri-500/5 to-transparent'
+                        : 'bg-gradient-to-br from-indo-500/5 to-transparent'
+                    )}
+                  />
+                </div>
 
-                 <div className="mb-2 flex items-center gap-2 sm:mb-3 sm:gap-3">
-                   <span className="text-2xl sm:text-3xl">{pocket.icon}</span>
-                   <h3 className="text-sm font-semibold text-text sm:text-base">
-                     {pocket.name}
-                   </h3>
-                 </div>
+                <div className="mb-2 flex items-center gap-2 sm:mb-3 sm:gap-3">
+                  <span className="text-2xl sm:text-3xl">{pocket.icon}</span>
+                  <h3 className="text-sm font-semibold text-text sm:text-base">
+                    {pocket.name}
+                  </h3>
+                </div>
 
-                 <p className="text-xl font-bold text-text sm:text-2xl">
-                   {formatCurrencyFull(pocket.currentAmount, currency.code)}
-                 </p>
+                <p className="text-xl font-bold text-text sm:text-2xl">
+                  {formatCurrencyFull(pocket.currentAmount, currency.code)}
+                </p>
 
-                <div className="mt-3 space-y-2">
+                 <div className="mt-3 space-y-2">
                   <div className="flex items-center justify-between text-xs text-text-secondary">
-                    <span>
-                      Target: {formatCurrencyFull(pocket.targetAmount, currency.code)}
-                    </span>
-                    <span>
-                      {Math.round(getProgress(pocket))}%
-                    </span>
-                  </div>
-                  <div className="h-2 w-full overflow-hidden rounded-full bg-border/50">
-                    <motion.div
-                      className="h-full rounded-full"
-                      style={{
-                        width: `${getProgress(pocket)}%`,
-                        backgroundColor: theme === 'green'
-                          ? (pocket.status === 'completed'
-                              ? '#22c55e'
-                              : pocket.status === 'behind'
-                                ? '#ef4444'
-                                : pocket.status === 'just-started'
-                                  ? '#f97316'
-                                  : '#eab308')
-                          : (pocket.status === 'completed'
-                              ? '#3b82f6'
-                              : pocket.status === 'behind'
-                                ? '#ef4444'
-                                : pocket.status === 'just-started'
-                                  ? '#f97316'
-                                  : '#eab308'),
-                      }}
-                      initial={{ width: 0 }}
-                      animate={{ width: `${getProgress(pocket)}%` }}
-                      transition={{ duration: 0.5, ease: 'easeOut' }}
-                    />
-                  </div>
-                </div>
+                     <span>
+                       Target: {formatCurrencyFull(pocket.targetAmount, currency.code)}
+                     </span>
+                     <span>
+                       {Math.round(getProgress(pocket))}%
+                     </span>
+                   </div>
+                   <div className="h-2 w-full overflow-hidden rounded-full bg-border/50">
+                     <motion.div
+                       className="h-full rounded-full"
+                       style={{
+                         width: `${getProgress(pocket)}%`,
+                         backgroundColor: theme === 'green'
+                           ? (pocket.status === 'completed'
+                               ? '#22c55e'
+                               : pocket.status === 'behind'
+                                 ? '#ef4444'
+                                 : pocket.status === 'just-started'
+                                   ? '#f97316'
+                                   : '#eab308')
+                           : (pocket.status === 'completed'
+                               ? '#3b82f6'
+                               : pocket.status === 'behind'
+                                 ? '#ef4444'
+                                 : pocket.status === 'just-started'
+                                   ? '#f97316'
+                                   : '#eab308'),
+                       }}
+                       initial={{ width: 0 }}
+                       animate={{ width: `${getProgress(pocket)}%` }}
+                       transition={{ duration: 0.5, ease: 'easeOut' }}
+                     />
+                   </div>
+                 </div>
 
-                <div className="mt-3 flex flex-col gap-2">
-                  <div className="flex items-center gap-2">
-                    <motion.button
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        handleIsiClick(pocket)
-                      }}
-                      title="Isi"
-                      className={cn(
-                        'flex flex-1 items-center justify-center gap-1 rounded-xl border border-transparent bg-gradient-to-r from-purple-500 to-indigo-600 px-3 py-2.5 text-xs font-medium text-white transition-all hover:from-purple-600 hover:to-indigo-700 sm:py-1.5'
-                      )}
-                    >
-                      <TrendingDown size={14} />
-                      + Isi
-                    </motion.button>
-                    <motion.button
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        handleTarikClick(pocket)
-                      }}
-                      title="Tarik"
-                      className={cn(
-                        'flex flex-1 items-center justify-center gap-1 rounded-xl border border-border bg-secondary/50 px-3 py-2.5 text-xs font-medium text-text-secondary transition-all hover:bg-secondary sm:py-1.5'
-                      )}
-                    >
-                      <TrendingUp size={12} />
-                      Tarik
-                    </motion.button>
-                  </div>
-                  <div className="flex items-center justify-end gap-1">
-                    <motion.button
-                      whileHover={{ scale: 1.1 }}
-                      whileTap={{ scale: 0.9 }}
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        handleEditClick(pocket)
-                      }}
-                      title="Edit"
-                      className={cn(
-                        'flex h-9 w-9 items-center justify-center rounded-lg text-text-tertiary transition-all hover:bg-secondary hover:text-text'
-                      )}
-                    >
-                      <Pencil size={16} />
-                    </motion.button>
-                    <motion.button
-                      whileHover={{ scale: 1.1 }}
-                      whileTap={{ scale: 0.9 }}
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        handleDeleteClick(pocket)
-                      }}
-                      title="Hapus"
-                      className={cn(
-                        'flex h-9 w-9 items-center justify-center rounded-lg text-text-tertiary transition-all hover:bg-error-500/10 hover:text-error-500'
-                      )}
-                    >
-                      <Trash2 size={16} />
-                    </motion.button>
-                  </div>
-                </div>
+                 <div className="mt-3 flex flex-col gap-2">
+                   <div className="flex items-center gap-2">
+                     <motion.button
+                       whileHover={{ scale: 1.02 }}
+                       whileTap={{ scale: 0.98 }}
+                       onClick={(e) => {
+                         e.stopPropagation()
+                         handleIsiClick(pocket)
+                       }}
+                       title="Isi"
+                       className={cn(
+                         'flex flex-1 items-center justify-center gap-1 rounded-xl border border-transparent bg-gradient-to-r from-purple-500 to-indigo-600 px-3 py-2.5 text-xs font-medium text-white transition-all hover:from-purple-600 hover:to-indigo-700 sm:py-1.5'
+                       )}
+                     >
+                       <TrendingDown size={14} />
+                       + Isi
+                     </motion.button>
+                     <motion.button
+                       whileHover={{ scale: 1.02 }}
+                       whileTap={{ scale: 0.98 }}
+                       onClick={(e) => {
+                         e.stopPropagation()
+                         handleTarikClick(pocket)
+                       }}
+                       title="Tarik"
+                       className={cn(
+                         'flex flex-1 items-center justify-center gap-1 rounded-xl border border-border bg-secondary/50 px-3 py-2.5 text-xs font-medium text-text-secondary transition-all hover:bg-secondary sm:py-1.5'
+                       )}
+                     >
+                       <TrendingUp size={12} />
+                       Tarik
+                     </motion.button>
+                   </div>
+                   <div className="flex items-center justify-end gap-1">
+                     <motion.button
+                       whileHover={{ scale: 1.1 }}
+                       whileTap={{ scale: 0.9 }}
+                       onClick={(e) => {
+                         e.stopPropagation()
+                         handleEditClick(pocket)
+                       }}
+                       title="Edit"
+                       className={cn(
+                         'flex h-9 w-9 items-center justify-center rounded-lg text-text-tertiary transition-all hover:bg-secondary hover:text-text'
+                       )}
+                     >
+                       <Pencil size={16} />
+                     </motion.button>
+                     <motion.button
+                       whileHover={{ scale: 1.1 }}
+                       whileTap={{ scale: 0.9 }}
+                       onClick={(e) => {
+                         e.stopPropagation()
+                         handleDeleteClick(pocket)
+                       }}
+                       title="Hapus"
+                       className={cn(
+                         'flex h-9 w-9 items-center justify-center rounded-lg text-text-tertiary transition-all hover:bg-error-500/10 hover:text-error-500'
+                       )}
+                     >
+                       <Trash2 size={16} />
+                     </motion.button>
+                   </div>
+                 </div>
               </motion.div>
             ))}
           </motion.div>
@@ -380,38 +352,46 @@ export function MoneyPockets() {
         onSave={handleAddSave}
       />
 
-      <EditPocketModal
-        open={showEditModal}
-        onClose={() => {
-          setShowEditModal(false)
-          setEditingPocket(null)
-        }}
-        pocket={editingPocket}
-        onSave={handleEditSave}
-      />
+      {editingPocket && (
+        <EditPocketModal
+          open={showEditModal}
+          onClose={() => {
+            setShowEditModal(false)
+            setEditingPocket(null)
+          }}
+          pocket={editingPocket}
+          onSave={handleEditSave}
+        />
+      )}
 
-      <DeleteConfirmation
-        open={showDeleteModal}
-        onClose={() => {
-          setShowDeleteModal(false)
-          setDeletingPocket(null)
-        }}
-        pocket={deletingPocket}
-        onConfirm={handleDeleteConfirm}
-      />
+      {deletingPocket && (
+        <DeleteConfirmation
+          open={showDeleteModal}
+          onClose={() => {
+            setShowDeleteModal(false)
+            setDeletingPocket(null)
+          }}
+          pocket={deletingPocket}
+          onConfirm={async () => await handleDeleteConfirm()}
+        />
+      )}
 
-      <PocketTransferModal
-        open={showTransferModal}
-        onClose={() => {
-          setShowTransferModal(false)
-          setTransferPocket(null)
-        }}
-        pocket={transferPocket}
-        availableBalance={balance.availableBalance}
-        mode={transferMode}
-        onConfirm={handleTransferConfirm}
-      />
+      {transferPocket && (
+        <PocketTransferModal
+          open={showTransferModal}
+          onClose={() => {
+            setShowTransferModal(false)
+            setTransferPocket(null)
+          }}
+          pocket={transferPocket}
+          availableBalance={balance?.availableBalance || 0}
+          mode={transferMode}
+          onConfirm={async (amount) => {
+            await handleTransferConfirm(amount)
+            return { success: true }
+          }}
+        />
+      )}
     </motion.div>
   )
 }
-

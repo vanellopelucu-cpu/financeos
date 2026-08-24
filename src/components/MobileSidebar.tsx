@@ -69,7 +69,7 @@ export function MobileSidebar({ open, onClose }: MobileSidebarProps) {
         initial="hidden"
         animate="visible"
         exit="hidden"
-        className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm"
+        className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm dark:bg-black/70"
         onClick={onClose}
       />
       <motion.aside

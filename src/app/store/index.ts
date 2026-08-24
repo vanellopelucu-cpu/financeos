@@ -109,11 +109,11 @@ export const useDashboardStore = create<DashboardState>()(
         moneyPockets: DASHBOARD_DATA.moneyPockets['indonesia'],
         transactions: DASHBOARD_DATA.transactions['indonesia'],
          workspaces: WORKSPACES,
-        accounts: DASHBOARD_DATA.accounts['indonesia'],
-        budgets: DASHBOARD_DATA.budgets['indonesia'],
-        debts: DASHBOARD_DATA.debts['indonesia'],
-        credits: DASHBOARD_DATA.credits['indonesia'],
-        searchQuery: '',
+         accounts: DASHBOARD_DATA.accounts['indonesia'],
+         budgets: DASHBOARD_DATA.budgets['indonesia'],
+         debts: DASHBOARD_DATA.debts['indonesia'],
+         credits: DASHBOARD_DATA.credits['indonesia'],
+         searchQuery: '',
 
          setWorkspace: (workspace) => {
           cleanupRealtimeSubscriptions()
@@ -172,60 +172,60 @@ export const useDashboardStore = create<DashboardState>()(
               .order('date', { ascending: false })
               .order('id', { ascending: false })
 
-               if (error) {
-                 console.warn('Failed to fetch transactions from Supabase, preserving current state:', error.message)
-                 set({ transactions: DASHBOARD_DATA.transactions[workspace] || [] })
-                 return
-               }
+                if (error) {
+                  console.warn('Failed to fetch transactions from Supabase, preserving current state:', error.message)
+                  set({ transactions: DASHBOARD_DATA.transactions[workspace] || [] })
+                  return
+                }
 
-              if (data) {
-                const mapped: Transaction[] = data.map((row: any) => ({
-                  id: row.id,
-                  description: row.description,
-                  category: row.category,
-                  date: row.date,
-                  amount: Number(row.amount),
-                  icon: row.icon,
-                  createdAt: row.created_at,
-                }))
-                set({ transactions: mapped })
-              }
+               if (data) {
+                 const mapped: Transaction[] = data.map((row: any) => ({
+                   id: row.id,
+                   description: row.description,
+                   category: row.category,
+                   date: row.date,
+                   amount: Number(row.amount),
+                   icon: row.icon,
+                   createdAt: row.created_at,
+                 }))
+                 set({ transactions: mapped })
+               }
             } catch (err) {
               console.warn('Error fetching transactions from Supabase, preserving current state:', err)
-              set({ transactions: DASHBOARD_DATA.transactions[workspace] || [] })
+              set({ transactions: [] })
             }
         },
 
-        fetchBills: async () => {
-          const workspace = get().currentWorkspace
+         fetchBills: async () => {
+           const workspace = get().currentWorkspace
 
-           if (!isSupabaseConfigured) {
-             const mockBills = DASHBOARD_DATA.upcomingBills[workspace]
-             const now = new Date()
-             const computed = mockBills.map((bill) => {
-               if (bill.status === 'paid') return bill
-               const dueDate = new Date(bill.dueDate)
-               if (now > dueDate) return { ...bill, status: 'overdue' as const }
-               return bill
-             })
-             set({
-               upcomingBills: computed,
-             })
-             return
-           }
+            if (!isSupabaseConfigured) {
+              const mockBills = DASHBOARD_DATA.upcomingBills[workspace]
+              const now = new Date()
+              const computed = mockBills.map((bill) => {
+                if (bill.status === 'paid') return bill
+                const dueDate = new Date(bill.dueDate)
+                if (now > dueDate) return { ...bill, status: 'overdue' as const }
+                return bill
+              })
+              set({
+                upcomingBills: computed,
+              })
+              return
+            }
 
-           try {
-             const { data, error } = await supabase
-               .from('bills')
-               .select('id, title, amount, due_date, icon, provider, status')
-               .eq('workspace', workspace)
-               .order('due_date', { ascending: true })
+            try {
+              const { data, error } = await supabase
+                .from('bills')
+                .select('id, title, amount, due_date, icon, provider, status')
+                .eq('workspace', workspace)
+                .order('due_date', { ascending: true })
 
-              if (error) {
-                console.warn('Failed to fetch bills from Supabase, preserving current state:', error.message)
-                set({ upcomingBills: DASHBOARD_DATA.upcomingBills[workspace] || [] })
-                return
-              }
+               if (error) {
+                 console.warn('Failed to fetch bills from Supabase, preserving current state:', error.message)
+                 set({ upcomingBills: DASHBOARD_DATA.upcomingBills[workspace] || [] })
+                 return
+               }
 
               if (data) {
                 const now = new Date()
@@ -812,6 +812,10 @@ payBill: async (bill, paidDate) => {
               }
               set({ transactions: [newTransaction, ...transactions] })
 
+              const nextDueDate = bill.recurring
+                ? new Date(new Date(bill.dueDate).getTime() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+                : bill.dueDate
+
               set((state) => ({
                 balance: {
                   ...state.balance,
@@ -820,7 +824,7 @@ payBill: async (bill, paidDate) => {
                 },
                 upcomingBills: state.upcomingBills.map((b) =>
                   b.id === bill.id
-                    ? { ...b, status: 'paid' as const, paidDate, paymentTransactionId: newTransaction.id }
+                    ? { ...b, status: 'paid' as const, paidDate, paymentTransactionId: newTransaction.id, dueDate: nextDueDate }
                     : b
                 ),
               }))
@@ -868,11 +872,16 @@ payBill: async (bill, paidDate) => {
                 original: bill.provider || null,
               })
 
+              const nextDueDate = bill.recurring
+                ? new Date(new Date(bill.dueDate).getTime() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+                : bill.dueDate
+
               const { error: billError } = await supabase
                 .from('bills')
                 .update({
                   status: 'paid',
                   provider: paymentInfo,
+                  due_date: nextDueDate,
                 })
                 .eq('id', bill.id)
                 .eq('workspace', workspace)
@@ -914,7 +923,7 @@ payBill: async (bill, paidDate) => {
                 },
                 upcomingBills: state.upcomingBills.map((b) =>
                   b.id === bill.id
-                    ? { ...b, status: 'paid' as const, paidDate, paymentTransactionId: txData.id }
+                    ? { ...b, status: 'paid' as const, paidDate, paymentTransactionId: txData.id, dueDate: nextDueDate }
                     : b
                 ),
               }))
@@ -2282,7 +2291,7 @@ payBill: async (bill, paidDate) => {
           }
         },
       }},
-      { name: 'finance-os-storage', version: 2, migrate: () => undefined }
+      { name: 'finance-os-storage', version: 3, migrate: () => undefined }
     )
   )
 )
