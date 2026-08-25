@@ -38,7 +38,7 @@ export function Dashboard() {
       variants={containerVariants}
       initial="hidden"
       animate="visible"
-      className="flex w-full min-w-0 max-w-full flex-col gap-3 pt-5 sm:gap-4 md:pt-6 lg:gap-5"
+      className="flex w-full min-w-0 max-w-full flex-col gap-3 pt-32 sm:gap-4 md:pt-28 lg:gap-5"
     >
       {/* Low Balance Warning - appears automatically when below threshold */}
       {showLowBalance && (

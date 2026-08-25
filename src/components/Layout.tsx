@@ -6,9 +6,11 @@ import { MobileSidebar } from '../components/MobileSidebar'
 import { Header } from '../components/Header'
 import { NotificationDropdown } from '../components/Header/NotificationDropdown'
 import { ProfileMenu } from '../components/Header/ProfileMenu'
+import { AddTransactionModal } from './AddTransactionModal'
 import { useTheme } from '../app/providers/ThemeContext'
 import { useWorkspace } from '../app/providers/WorkspaceContext'
 import { useNotificationStore } from '../app/store/notifications'
+import { useDashboardStore } from '../app/store'
 import { cn } from '../lib/utils'
 
 const QUOTES = [
@@ -43,9 +45,11 @@ export function Layout() {
   const [showProfile, setShowProfile] = useState(false)
   const [showNotifications, setShowNotifications] = useState(false)
   const [showCurrencySelector, setShowCurrencySelector] = useState(false)
+  const [showAddTransaction, setShowAddTransaction] = useState(false)
   const { theme, toggleTheme } = useTheme()
   const { currentWorkspace, setWorkspace } = useWorkspace()
   const { unreadCount } = useNotificationStore()
+  const { addTransaction, fetchTransactions, fetchAnalytics } = useDashboardStore()
   const isDark = theme === 'dark'
   const location = useLocation()
   const navigate = useNavigate()
@@ -72,6 +76,10 @@ export function Layout() {
     console.log('Layout rendered, theme:', theme)
   }, [theme])
 
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' })
+  }, [location.pathname])
+
   const isActive = (path: string) => location.pathname === path
 
   const navItems = [
@@ -86,87 +94,91 @@ export function Layout() {
       <Sidebar />
       <MobileSidebar open={mobileNavOpen} onClose={() => setMobileNavOpen(false)} />
       <div className="flex min-w-0 flex-1 flex-col md:ml-64">
-        <div className="hidden md:block">
-          <div className="fixed top-0 right-0 left-0 z-50 md:left-64">
-            <Header />
-          </div>
-        </div>
-
-        <header className="fixed top-0 right-0 left-0 z-50 border-b border-border bg-background/80 backdrop-blur-md md:hidden">
-          <div className="flex h-12 items-center justify-between gap-2 px-4">
-            <button
-              type="button"
-              aria-label="Toggle navigation"
-              onClick={() => setMobileNavOpen(true)}
-              className={cn(
-                'flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-border bg-secondary text-text-secondary transition-all duration-300 hover:bg-border'
-              )}
-            >
-              <Menu size={20} />
-            </button>
-            <span className="min-w-0 flex-1 truncate text-center text-lg font-bold text-text">FinanceOS</span>
-            <div className="flex shrink-0 items-center gap-1">
-              <button
-                type="button"
-                aria-label="Toggle theme"
-                onClick={toggleTheme}
-                className={cn(
-                  'flex h-10 w-10 items-center justify-center rounded-xl border border-border bg-secondary text-text-secondary transition-all duration-300 hover:bg-border'
-                )}
-              >
-                {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
-              </button>
-              <div className="relative">
-                <button
-                  type="button"
-                  aria-label="Notifications"
-                  onClick={() => setShowNotifications(!showNotifications)}
-                  className={cn(
-                    'relative flex h-10 w-10 items-center justify-center rounded-xl border border-border bg-secondary text-text-secondary transition-all duration-300 hover:bg-border'
-                  )}
-                >
-                  <Bell size={18} />
-                  {unreadCount > 0 && (
-                    <span className="absolute top-1.5 right-1.5 flex h-5 w-5 items-center justify-center rounded-full border-2 border-surface text-xs font-bold text-white dark:bg-red-600" style={isDark ? {} : { backgroundColor: '#ef4444' }}>
-                      {unreadCount > 9 ? '9+' : unreadCount}
-                    </span>
-                  )}
-                </button>
-                {showNotifications && (
-                  <NotificationDropdown isOpen={showNotifications} onClose={() => setShowNotifications(false)} />
-                )}
-              </div>
-              <div className="relative">
-                <button
-                  type="button"
-                  aria-label="User menu"
-                  onClick={() => setShowProfile(!showProfile)}
-                  className={cn(
-                    'flex h-10 w-10 items-center justify-center rounded-xl border border-transparent bg-gradient-to-br from-purple-500 to-indigo-600 text-white transition-all duration-300 hover:shadow-md'
-                  )}
-                >
-                  <User size={18} />
-                </button>
-                {showProfile && (
-                  <ProfileMenu isOpen={showProfile} onClose={() => setShowProfile(false)} />
-                )}
-              </div>
+        {location.pathname === '/' && !mobileNavOpen && (
+          <div className="hidden md:block">
+            <div className="fixed top-0 right-0 left-0 z-50 md:left-64">
+              <Header />
             </div>
           </div>
-          <div className="flex flex-col gap-1 px-4 pb-3">
-            <h1 className="text-base font-semibold text-text">
-              {greeting}, Yaya 🌸
-            </h1>
-            <p className="text-xs italic text-text-secondary">
-              &ldquo;{QUOTES[quoteIndex]}&rdquo;
-            </p>
-            <p className="text-xs text-text-tertiary">
-              {dateLabel} · {currentWorkspace.name} · {currentWorkspace.currency.symbol}
-            </p>
-          </div>
-        </header>
+        )}
 
-        <main className="mx-auto w-full max-w-7xl flex-1 px-4 pt-36 pb-20 sm:px-6 md:pt-28 md:pb-12 lg:px-8">
+        {location.pathname === '/' && !mobileNavOpen && (
+          <header className="fixed top-0 right-0 left-0 z-50 border-b border-border bg-background/80 backdrop-blur-md md:hidden">
+            <div className="flex h-12 items-center justify-between gap-2 px-4">
+              <button
+                type="button"
+                aria-label="Toggle navigation"
+                onClick={() => setMobileNavOpen(true)}
+                className={cn(
+                  'flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-border bg-secondary text-text-secondary transition-all duration-300 hover:bg-border'
+                )}
+              >
+                <Menu size={20} />
+              </button>
+              <span className="min-w-0 flex-1 truncate text-center text-lg font-bold text-text">FinanceOS</span>
+              <div className="flex shrink-0 items-center gap-1">
+                <button
+                  type="button"
+                  aria-label="Toggle theme"
+                  onClick={toggleTheme}
+                  className={cn(
+                    'flex h-10 w-10 items-center justify-center rounded-xl border border-border bg-secondary text-text-secondary transition-all duration-300 hover:bg-border'
+                  )}
+                >
+                  {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
+                </button>
+                <div className="relative">
+                  <button
+                    type="button"
+                    aria-label="Notifications"
+                    onClick={() => setShowNotifications(!showNotifications)}
+                    className={cn(
+                      'relative flex h-10 w-10 items-center justify-center rounded-xl border border-border bg-secondary text-text-secondary transition-all duration-300 hover:bg-border'
+                    )}
+                  >
+                    <Bell size={18} />
+                    {unreadCount > 0 && (
+                      <span className="absolute top-1.5 right-1.5 flex h-5 w-5 items-center justify-center rounded-full border-2 border-surface text-xs font-bold text-white dark:bg-red-600" style={isDark ? {} : { backgroundColor: '#ef4444' }}>
+                        {unreadCount > 9 ? '9+' : unreadCount}
+                      </span>
+                    )}
+                  </button>
+                  {showNotifications && (
+                    <NotificationDropdown isOpen={showNotifications} onClose={() => setShowNotifications(false)} />
+                  )}
+                </div>
+                <div className="relative">
+                  <button
+                    type="button"
+                    aria-label="User menu"
+                    onClick={() => setShowProfile(!showProfile)}
+                    className={cn(
+                      'flex h-10 w-10 items-center justify-center rounded-xl border border-transparent bg-gradient-to-br from-purple-500 to-indigo-600 text-white transition-all duration-300 hover:shadow-md'
+                    )}
+                  >
+                    <User size={18} />
+                  </button>
+                  {showProfile && (
+                    <ProfileMenu isOpen={showProfile} onClose={() => setShowProfile(false)} />
+                  )}
+                </div>
+              </div>
+            </div>
+            <div className="flex flex-col gap-1 px-4 pb-3">
+              <h1 className="text-base font-semibold text-text">
+                {greeting}, Yaya 🌸
+              </h1>
+              <p className="text-xs italic text-text-secondary">
+                &ldquo;{QUOTES[quoteIndex]}&rdquo;
+              </p>
+              <p className="text-xs text-text-tertiary">
+                {dateLabel} · {currentWorkspace.name} · {currentWorkspace.currency.symbol}
+              </p>
+            </div>
+          </header>
+        )}
+
+        <main className="mx-auto w-full max-w-7xl flex-1 px-4 pb-20 sm:px-6 md:pb-12 lg:px-8">
           <Outlet />
         </main>
 
@@ -217,10 +229,15 @@ export function Layout() {
                 key={item.path}
                 type="button"
                 onClick={() => {
+                  setShowCurrencySelector(false)
                   if (item.path === '/') {
-                    setShowCurrencySelector(!showCurrencySelector)
+                    if (location.pathname === '/') {
+                      setShowCurrencySelector((prev) => !prev)
+                    } else {
+                      navigate('/')
+                      window.scrollTo({ top: 0, behavior: 'instant' })
+                    }
                   } else {
-                    setShowCurrencySelector(false)
                     navigate(item.path)
                   }
                 }}
@@ -239,6 +256,7 @@ export function Layout() {
               type="button"
               onClick={() => {
                 setShowCurrencySelector(false)
+                setShowAddTransaction(true)
               }}
               className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-gradient-to-r from-purple-500 to-indigo-600 text-white shadow-lg"
             >
@@ -272,6 +290,18 @@ export function Layout() {
             onClick={() => setShowCurrencySelector(false)}
           />
         )}
+        <AddTransactionModal
+          open={showAddTransaction}
+          onClose={() => setShowAddTransaction(false)}
+          onSave={async (transaction) => {
+            const result = await addTransaction(transaction)
+            if (result.success) {
+              setShowAddTransaction(false)
+              await fetchTransactions()
+              await fetchAnalytics()
+            }
+          }}
+        />
       </div>
     </div>
   )
