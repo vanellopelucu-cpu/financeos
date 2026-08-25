@@ -30,6 +30,7 @@ const rowVariants: Variants = {
 
 export function Dashboard() {
   const [showAddTransaction, setShowAddTransaction] = useState(false)
+  const [showLowBalance, setShowLowBalance] = useState(true)
   const { addTransaction, fetchTransactions, fetchAnalytics } = useDashboardStore()
 
   return (
@@ -37,38 +38,30 @@ export function Dashboard() {
       variants={containerVariants}
       initial="hidden"
       animate="visible"
-      className="flex flex-col gap-4 pb-24"
+      className="flex w-full min-w-0 max-w-full flex-col gap-3 pt-5 sm:gap-4 md:pt-6 lg:gap-5"
     >
       {/* Low Balance Warning - appears automatically when below threshold */}
-      <LowBalanceWarning />
+      {showLowBalance && (
+        <LowBalanceWarning onDismiss={() => setShowLowBalance(false)} />
+      )}
 
-      {/* Desktop: Available Balance + Upcoming Bills side by side */}
-      <div className="hidden md:grid md:grid-cols-5 md:gap-4">
-        <motion.div variants={rowVariants} className="md:col-span-3">
+      {/* Desktop/Tablet: Available Balance + Upcoming Bills side by side */}
+      <div className="grid min-w-0 gap-3 sm:gap-4 md:grid-cols-5 lg:gap-5">
+        <motion.div variants={rowVariants} className="min-w-0 md:col-span-3">
           <HeroBalanceCard />
         </motion.div>
-        <motion.div variants={rowVariants} className="md:col-span-2">
+        <motion.div variants={rowVariants} className="min-w-0 md:col-span-2">
           <UpcomingBillsReminder />
         </motion.div>
       </div>
 
-      {/* Mobile: Available Balance full width */}
-      <motion.div variants={rowVariants} className="md:hidden">
-        <HeroBalanceCard />
-      </motion.div>
-
-      {/* Mobile: Upcoming Bills full width */}
-      <motion.div variants={rowVariants} className="md:hidden">
-        <UpcomingBillsReminder />
-      </motion.div>
-
       {/* Money Pockets - Full Width */}
-      <motion.div variants={rowVariants}>
+      <motion.div variants={rowVariants} className="min-w-0">
         <MoneyPockets />
       </motion.div>
 
       {/* Recent Transactions */}
-      <motion.div variants={rowVariants}>
+      <motion.div variants={rowVariants} className="min-w-0">
         <RecentTransactions />
       </motion.div>
 

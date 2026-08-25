@@ -135,176 +135,176 @@ export function UpcomingBillsReminder() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, ease: 'easeOut' }}
-        className="h-full"
+        className="h-full min-w-0"
       >
       <Card
         glass
         elevated
-        className="h-full border-0 p-0 shadow-xl"
+        className="h-full overflow-hidden border-0 p-0 shadow-xl"
       >
-         <CardHeader className="border-b border-border/50 pb-4">
-           <div className="flex items-center justify-between">
-             <CardTitle className="text-sm font-medium uppercase tracking-wider text-text-secondary">
-               Upcoming Bills
-             </CardTitle>
-             <motion.button
-               whileHover={{ scale: 1.1 }}
-               whileTap={{ scale: 0.9 }}
-               onClick={() => setShowAddModal(true)}
-               className={cn(
-                 'flex h-9 w-9 items-center justify-center rounded-lg bg-workspace/10 text-workspace transition-colors hover:bg-workspace/20'
-               )}
-               aria-label="Add bill"
-             >
-               <Plus size={16} />
-             </motion.button>
-           </div>
-         </CardHeader>
+          <CardHeader className="border-b border-border/50 p-3 pb-3 sm:p-4 sm:pb-4 md:p-6 md:pb-4">
+            <div className="flex items-center justify-between gap-2">
+              <CardTitle className="shrink-0 text-xs font-medium uppercase tracking-wider text-text-secondary sm:text-sm">
+                Upcoming Bills
+              </CardTitle>
+              <motion.button
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+                onClick={() => setShowAddModal(true)}
+                className={cn(
+                  'flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-workspace/10 text-workspace transition-colors hover:bg-workspace/20 sm:h-9 sm:w-9'
+                )}
+                aria-label="Add bill"
+              >
+                <Plus size={16} />
+              </motion.button>
+            </div>
+          </CardHeader>
 
-         <CardContent className="p-0">
-           <motion.div
-             className="flex flex-col"
-             initial="hidden"
-             animate="visible"
-             variants={{
-               visible: {
-                 transition: {
-                   staggerChildren: 0.08,
-                   delayChildren: 0.1,
-                 },
-               },
-             }}
-           >
-              {sortedBills.length === 0 ? (
-                <div className="py-6 text-center">
-                  <p className="text-sm text-text-secondary">
-                    No upcoming bills.
-                  </p>
-                </div>
-              ) : (
-                sortedBills.slice(0, 3).map((bill) => {
-                 const isPaid = bill.status === 'paid'
-                 const isOverdue = bill.status === 'overdue'
+          <CardContent className="p-0">
+            <motion.div
+              className="flex flex-col"
+              initial="hidden"
+              animate="visible"
+              variants={{
+                visible: {
+                  transition: {
+                    staggerChildren: 0.08,
+                    delayChildren: 0.1,
+                  },
+                },
+              }}
+            >
+               {sortedBills.length === 0 ? (
+                 <div className="py-4 text-center sm:py-6">
+                   <p className="text-xs text-text-secondary sm:text-sm">
+                     No upcoming bills.
+                   </p>
+                 </div>
+               ) : (
+                 sortedBills.slice(0, 3).map((bill) => {
+                  const isPaid = bill.status === 'paid'
+                  const isOverdue = bill.status === 'overdue'
 
-                 return (
-                    <motion.div
-                      key={bill.id}
-                      variants={itemVariants}
-                      className={cn(
-                        'group flex items-center justify-between gap-2 border-b border-border/30 p-3 transition-all last:border-0 sm:p-4',
-                        isPaid ? 'opacity-75' : ''
-                      )}
-                    >
-                         <div className="flex items-center gap-2 sm:gap-3">
-                        <div className={cn(
-                          'flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg text-lg shadow-soft sm:h-12 sm:w-12 sm:rounded-xl sm:text-2xl',
-                          isPaid ? 'bg-success-500/10' : isOverdue ? 'bg-red-500/10' : 'bg-secondary'
-                        )}>
-                         {bill.icon || '📄'}
-                       </div>
-                       <div>
-                         <div className="flex items-center gap-2">
-                           <p className="font-semibold text-text">{bill.title}</p>
-                           {isPaid && (
-                             <Badge
-                               className={cn('border', statusColors.paid)}
-                             >
-                               <span className="flex items-center gap-1">
-                                 <span className="h-1.5 w-1.5 rounded-full bg-success-500"></span>
-                                 LUNAS
-                               </span>
-                             </Badge>
-                           )}
-                           {isOverdue && !isPaid && (
-                             <Badge
-                               className={cn('border', statusColors.overdue)}
-                             >
-                               TERLENDIR
-                             </Badge>
-                           )}
-                         </div>
-                         <div className="flex items-center gap-2 text-sm text-text-secondary">
-                           <span>{getDueDateLabel(bill.dueDate)}</span>
-                           {isPaid && bill.paidDate && (
-                             <>
-                               <span>·</span>
-                               <span>Dibayar: {formatPaidDate(bill.paidDate)}</span>
-                             </>
-                           )}
-                         </div>
-                       </div>
-                     </div>
-                        <div className="flex items-center gap-1 sm:gap-2">
-                        <span className="text-right text-sm font-semibold text-text sm:text-base">
-                          {formatCurrencyFull(bill.amount, currency.code)}
-                        </span>
+                   return (
+                      <motion.div
+                        key={bill.id}
+                        variants={itemVariants}
+                        className={cn(
+                          'group flex min-w-0 items-center justify-between gap-2 border-b border-border/30 px-3 py-2 transition-all last:border-0 sm:px-4 sm:py-3 md:p-4',
+                          isPaid ? 'opacity-75' : ''
+                        )}
+                      >
+                          <div className="flex items-center gap-2 sm:gap-3">
+                         <div className={cn(
+                           'flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-lg text-sm shadow-soft sm:h-9 sm:w-9 sm:text-lg md:h-12 md:w-12 md:rounded-xl md:text-2xl',
+                           isPaid ? 'bg-success-500/10' : isOverdue ? 'bg-red-500/10' : 'bg-secondary'
+                         )}>
+                          {bill.icon || '📄'}
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center gap-1 sm:gap-2">
+                            <p className="truncate text-xs font-semibold text-text sm:text-sm md:text-base">{bill.title}</p>
+                            {isPaid && (
+                              <Badge
+                                className={cn('border text-[7px] sm:text-[10px] md:text-xs', statusColors.paid)}
+                              >
+                                <span className="flex items-center gap-0.5 sm:gap-1">
+                                  <span className="h-1 w-1 rounded-full bg-success-500 sm:h-1.5 sm:w-1.5"></span>
+                                  LUNAS
+                                </span>
+                              </Badge>
+                            )}
+                            {isOverdue && !isPaid && (
+                              <Badge
+                                className={cn('border text-[7px] sm:text-[10px] md:text-xs', statusColors.overdue)}
+                              >
+                                TERLENDIR
+                              </Badge>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-1 text-[10px] text-text-secondary sm:gap-2 sm:text-xs md:text-sm">
+                            <span>{getDueDateLabel(bill.dueDate)}</span>
+                            {isPaid && bill.paidDate && (
+                              <>
+                                <span>·</span>
+                                <span className="hidden sm:inline">Dibayar: {formatPaidDate(bill.paidDate)}</span>
+                              </>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                         <div className="flex items-center gap-1 sm:gap-2">
+                          <span className="text-right text-xs font-semibold text-text sm:text-sm md:text-base">
+                           {formatCurrencyFull(bill.amount, currency.code)}
+                         </span>
 
-                       {!isPaid && (
-                         <motion.button
-                           whileHover={{ scale: 1.05 }}
-                           whileTap={{ scale: 0.95 }}
-                           onClick={() => {
-                             setPayingBill(bill)
-                             setShowPayModal(true)
-                           }}
-                           className={cn(
-                             'flex h-9 w-9 items-center justify-center rounded-lg bg-success-500/10 text-success-500 transition-colors hover:bg-success-500/20'
-                           )}
-                           aria-label={`Mark ${bill.title} as paid`}
-                         >
-                           <Check size={16} />
-                         </motion.button>
+                        {!isPaid && (
+                          <motion.button
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                            onClick={() => {
+                              setPayingBill(bill)
+                              setShowPayModal(true)
+                            }}
+                            className={cn(
+                              'flex h-7 w-7 items-center justify-center rounded-lg bg-success-500/10 text-success-500 transition-colors hover:bg-success-500/20 sm:h-8 sm:w-8 md:h-9 md:w-9'
+                            )}
+                            aria-label={`Mark ${bill.title} as paid`}
+                          >
+                            <Check size={14} />
+                          </motion.button>
+                        )}
+
+                        {isPaid && (
+                          <motion.button
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                            onClick={() => {
+                              setUnpayingBill(bill)
+                              setShowUnpayModal(true)
+                            }}
+                            className={cn(
+                              'flex h-7 w-7 items-center justify-center rounded-lg bg-warning-500/10 text-warning-500 transition-colors hover:bg-warning-500/20 sm:h-8 sm:w-8 md:h-9 md:w-9'
+                            )}
+                            aria-label={`Mark ${bill.title} as unpaid`}
+                          >
+                            <RotateCw size={14} />
+                          </motion.button>
+                        )}
+
+                     <button
+                       type="button"
+                       onClick={() => {
+                         setDeletingBill(bill)
+                         setShowDeleteModal(true)
+                       }}
+                       className={cn(
+                         'flex h-7 w-7 items-center justify-center rounded-lg text-text-tertiary transition-all hover:bg-error-500/10 hover:text-error-500 sm:h-8 sm:w-8 md:h-9 md:w-9'
                        )}
+                       aria-label={`Delete ${bill.title}`}
+                     >
+                       <Trash2 size={14} />
+                     </button>
+                      </div>
+                    </motion.div>
+                  )
+                })
+              )}
+            </motion.div>
 
-                       {isPaid && (
-                         <motion.button
-                           whileHover={{ scale: 1.05 }}
-                           whileTap={{ scale: 0.95 }}
-                           onClick={() => {
-                             setUnpayingBill(bill)
-                             setShowUnpayModal(true)
-                           }}
-                           className={cn(
-                             'flex h-9 w-9 items-center justify-center rounded-lg bg-warning-500/10 text-warning-500 transition-colors hover:bg-warning-500/20'
-                           )}
-                           aria-label={`Mark ${bill.title} as unpaid`}
-                         >
-                           <RotateCw size={16} />
-                         </motion.button>
-                       )}
-
-                       <button
-                         type="button"
-                         onClick={() => {
-                           setDeletingBill(bill)
-                           setShowDeleteModal(true)
-                         }}
-                         className={cn(
-                           'flex h-9 w-9 items-center justify-center rounded-lg text-text-tertiary transition-all hover:bg-error-500/10 hover:text-error-500'
-                         )}
-                         aria-label={`Delete ${bill.title}`}
-                       >
-                         <Trash2 size={16} />
-                       </button>
-                     </div>
-                   </motion.div>
-                 )
-               })
-             )}
-           </motion.div>
-
-           <motion.button
-             whileHover={{ x: 4 }}
-             whileTap={{ scale: 0.98 }}
-             onClick={() => navigate('/bills')}
-             className={cn(
-               'flex w-full items-center justify-center gap-2 border-t border-border/50 py-4 text-sm font-medium text-workspace transition-colors hover:text-workspace-hover'
-             )}
-           >
-             View All Bills
-             <ChevronRight size={16} />
-           </motion.button>
-         </CardContent>
+            <motion.button
+              whileHover={{ x: 4 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => navigate('/bills')}
+              className={cn(
+                'flex w-full items-center justify-center gap-2 border-t border-border/50 py-3 text-xs font-medium text-workspace transition-colors hover:text-workspace-hover sm:py-4 sm:text-sm'
+              )}
+            >
+              View All Bills
+              <ChevronRight size={14} />
+            </motion.button>
+          </CardContent>
        </Card>
      </motion.div>
 
