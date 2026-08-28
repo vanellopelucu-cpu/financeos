@@ -23,6 +23,28 @@ const DEFAULT_POCKETS = [
   { id: 'pocket-tabungan-rumah', name: 'Tabungan Rumah', icon: '\u{1F3E0}' },
 ]
 
+const STORAGE_KEY_DISMISSED_DEFAULTS = 'financeos_dismissed_defaults'
+
+function loadDismissedDefaults(): Set<string> {
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY_DISMISSED_DEFAULTS)
+    if (stored) {
+      return new Set(JSON.parse(stored) as string[])
+    }
+  } catch {
+    // ignore parse errors
+  }
+  return new Set()
+}
+
+function saveDismissedDefaults(ids: Set<string>) {
+  try {
+    localStorage.setItem(STORAGE_KEY_DISMISSED_DEFAULTS, JSON.stringify([...ids]))
+  } catch {
+    // ignore storage errors
+  }
+}
+
 export function MoneyPockets() {
   const { currentWorkspace } = useWorkspace()
   const { currency, theme } = currentWorkspace
@@ -37,7 +59,15 @@ export function MoneyPockets() {
   const [editingPocket, setEditingPocket] = useState<MoneyPocket | null>(null)
   const [deletingPocket, setDeletingPocket] = useState<MoneyPocket | null>(null)
   const [transferPocket, setTransferPocket] = useState<MoneyPocket | null>(null)
-  const [dismissedDefaults, setDismissedDefaults] = useState<Set<string>>(new Set())
+  const [dismissedDefaults, setDismissedDefaults] = useState<Set<string>>(loadDismissedDefaults)
+
+  const updateDismissedDefaults = (updater: (prev: Set<string>) => Set<string>) => {
+    setDismissedDefaults((prev) => {
+      const next = updater(prev)
+      saveDismissedDefaults(next)
+      return next
+    })
+  }
 
   const pocketMap = new Map((moneyPockets || []).map((p) => [p.name, p]))
   const defaultPocketsMerged = DEFAULT_POCKETS.filter((dp) => !dismissedDefaults.has(dp.id)).map((dp) => {
@@ -103,7 +133,7 @@ export function MoneyPockets() {
       if (result.success) {
         setShowEditModal(false)
         setEditingPocket(null)
-        setDismissedDefaults((prev) => new Set(prev).add(id))
+        updateDismissedDefaults((prev) => new Set(prev).add(id))
         await fetchMoneyPockets()
       }
       return
@@ -120,16 +150,19 @@ export function MoneyPockets() {
     }
   }
 
-  const handleDeleteConfirm = async () => {
-    if (!deletingPocket) return
-    const isDefaultId = deletingPocket.id.startsWith('pocket-')
+  const handleDeleteConfirm = async (id?: string) => {
+    const pocketId = id || deletingPocket?.id
+    if (!pocketId) return
+    
+    const isDefaultId = pocketId.startsWith('pocket-')
     if (isDefaultId) {
-      setDismissedDefaults((prev) => new Set(prev).add(deletingPocket.id))
+      updateDismissedDefaults((prev) => new Set(prev).add(pocketId))
       setShowDeleteModal(false)
       setDeletingPocket(null)
       return
     }
-    const result = await deletePocket(deletingPocket.id)
+    
+    const result = await deletePocket(pocketId)
     if (result.success) {
       setShowDeleteModal(false)
       setDeletingPocket(null)
@@ -385,7 +418,7 @@ export function MoneyPockets() {
             setDeletingPocket(null)
           }}
           pocket={deletingPocket}
-          onConfirm={async () => await handleDeleteConfirm()}
+          onConfirm={handleDeleteConfirm}
         />
       )}
 
